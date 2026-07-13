@@ -1,45 +1,113 @@
 "use client";
 
-import { motion } from "framer-motion";
-import ProductCard from "./ProductCard";
+import { AnimatePresence, motion } from "framer-motion";
+import { useMemo, useState } from "react";
+import ProductCard, { Product } from "./ProductCard";
 
-const categories = [
-  "Homme",
-  "Femme",
-  "Lunettes de vue",
-  "Lunettes de soleil",
-  "Accessoires",
+type Filter =
+  | "tous"
+  | "homme"
+  | "femme"
+  | "vue"
+  | "soleil"
+  | "accessoires";
+
+const filters: Array<{ id: Filter; label: string }> = [
+  { id: "tous", label: "Tous" },
+  { id: "homme", label: "Homme" },
+  { id: "femme", label: "Femme" },
+  { id: "vue", label: "Lunettes de vue" },
+  { id: "soleil", label: "Lunettes de soleil" },
+  { id: "accessoires", label: "Accessoires" },
 ];
 
-const products = [
+const products: Product[] = [
   {
-    name: "Héritage 01",
-    category: "Lunettes de vue",
-    price: "Prix sur demande",
-    variant: "round" as const,
+    id: 1,
+    name: "Ida",
+    reference: "PO1018S",
+    category: "soleil",
+    audience: ["homme", "femme"],
+    image: "/images/products/persol-gold-sun.webp",
+    hoverImage: "/images/lifestyle/persol-men-alpine.webp",
+    color: "Métal doré · Verres gris",
+    badge: "Signature",
   },
   {
-    name: "Éclat 02",
-    category: "Lunettes de soleil",
-    price: "Prix sur demande",
-    variant: "cat-eye" as const,
+    id: 2,
+    name: "Terra",
+    reference: "PO3218V",
+    category: "vue",
+    audience: ["homme", "femme"],
+    image: "/images/products/persol-blue-optical.webp",
+    color: "Acétate bleu · Verres optiques",
   },
   {
-    name: "Signature 03",
-    category: "Lunettes de vue",
-    price: "Prix sur demande",
-    variant: "square" as const,
+    id: 3,
+    name: "Horizon",
+    reference: "PO3235S",
+    category: "soleil",
+    audience: ["homme", "femme"],
+    image: "/images/products/persol-tortoise-sun.webp",
+    hoverImage: "/images/lifestyle/persol-women-round.webp",
+    color: "Écaille havane · Verres verts",
     dark: true,
   },
   {
-    name: "Horizon 04",
-    category: "Lunettes de soleil",
-    price: "Prix sur demande",
-    variant: "aviator" as const,
+    id: 4,
+    name: "Verde",
+    reference: "PO3391V",
+    category: "vue",
+    audience: ["homme", "femme"],
+    image: "/images/products/persol-green-optical.webp",
+    color: "Acétate vert sauge · Verres optiques",
+  },
+  {
+    id: 5,
+    name: "Noir P",
+    reference: "PO2803S",
+    category: "soleil",
+    audience: ["homme"],
+    image: "/images/products/persol-black-sun.webp",
+    hoverImage: "/images/lifestyle/persol-men-round.webp",
+    color: "Noir brillant · Verres polarisés",
+    badge: "Polarized",
+  },
+  {
+    id: 6,
+    name: "Cinema",
+    reference: "PO3396S",
+    category: "soleil",
+    audience: ["homme", "femme"],
+    image: "/images/products/persol-black-gradient.webp",
+    hoverImage: "/images/lifestyle/persol-women-alpine.webp",
+    color: "Noir · Verres dégradés",
   },
 ];
 
 export default function Collections() {
+  const [activeFilter, setActiveFilter] = useState<Filter>("tous");
+
+  const filteredProducts = useMemo(() => {
+    if (activeFilter === "tous") {
+      return products;
+    }
+
+    if (activeFilter === "homme" || activeFilter === "femme") {
+      return products.filter((product) =>
+        product.audience.includes(activeFilter),
+      );
+    }
+
+    if (activeFilter === "vue" || activeFilter === "soleil") {
+      return products.filter(
+        (product) => product.category === activeFilter,
+      );
+    }
+
+    return [];
+  }, [activeFilter]);
+
   return (
     <section
       id="collections"
@@ -67,44 +135,66 @@ export default function Collections() {
           </div>
 
           <p className="max-w-md leading-7 text-[#526b6c]">
-            Une première sélection de démonstration. Les modèles définitifs
-            seront ajoutés après la visite du magasin et les photos des
-            collections disponibles.
+            Une sélection de démonstration destinée à présenter l’expérience
+            digitale de LOZA Optique. Les collections définitives seront
+            ajoutées avec les produits réellement disponibles en magasin.
           </p>
         </motion.div>
 
-        <div className="mt-12 flex gap-3 overflow-x-auto pb-3">
-          {categories.map((category, index) => (
+        <div className="mt-12 flex gap-3 overflow-x-auto pb-4">
+          {filters.map((filter) => (
             <button
-              key={category}
+              key={filter.id}
               type="button"
+              onClick={() => setActiveFilter(filter.id)}
               className={`whitespace-nowrap rounded-full border px-5 py-3 text-sm font-medium transition ${
-                index === 0
+                activeFilter === filter.id
                   ? "border-[#103943] bg-[#103943] text-white"
-                  : "border-[#103943]/20 bg-transparent hover:border-[#103943] hover:bg-white/50"
+                  : "border-[#103943]/20 hover:border-[#103943] hover:bg-white/50"
               }`}
             >
-              {category}
+              {filter.label}
+
+              {filter.id === "accessoires" && (
+                <span className="ml-2 text-[10px] opacity-60">
+                  Bientôt
+                </span>
+              )}
             </button>
           ))}
         </div>
 
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-          {products.map((product, index) => (
-            <motion.div
-              key={product.name}
-              initial={{ opacity: 0, y: 35 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{
-                duration: 0.6,
-                delay: index * 0.1,
-              }}
-            >
-              <ProductCard {...product} />
-            </motion.div>
-          ))}
-        </div>
+        {activeFilter === "accessoires" ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mt-12 rounded-[2rem] border border-[#103943]/10 bg-white/50 px-8 py-20 text-center"
+          >
+            <p className="text-xs uppercase tracking-[0.35em] text-[#a27d38]">
+              Accessoires
+            </p>
+
+            <h3 className="mt-5 text-3xl font-semibold">
+              Étuis, kits d’entretien et cordons
+            </h3>
+
+            <p className="mx-auto mt-4 max-w-xl leading-7 text-[#526b6c]">
+              Cette sélection sera ajoutée après confirmation des accessoires
+              disponibles chez LOZA Optique.
+            </p>
+          </motion.div>
+        ) : (
+          <motion.div
+            layout
+            className="mt-12 grid gap-6 sm:grid-cols-2 xl:grid-cols-3"
+          >
+            <AnimatePresence mode="popLayout">
+              {filteredProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        )}
       </div>
     </section>
   );

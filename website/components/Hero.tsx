@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowUpRight, CalendarDays } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function Hero() {
   return (
@@ -86,15 +87,13 @@ export default function Hero() {
             ease: "easeOut",
           }}
         >
-          <div className="group relative aspect-[4/5] w-full max-w-lg overflow-hidden rounded-[2.5rem] bg-[#123a42] shadow-2xl shadow-[#123a42]/25 transition duration-500 hover:-translate-y-2">
-            <div className="absolute inset-0 bg-gradient-to-br from-[#1f5962] via-[#123a42] to-[#071d22]" />
-
-            <div className="absolute left-8 top-8 text-xs uppercase tracking-[0.3em] text-white/60">
+          <div className="group relative aspect-[4/5] w-full max-w-lg overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#1f5962] via-[#123a42] to-[#071d22] shadow-2xl shadow-[#123a42]/25 transition duration-500 hover:-translate-y-2">
+            <div className="absolute left-8 top-8 z-20 text-xs uppercase tracking-[0.3em] text-white/60">
               LOZA Collection 01
             </div>
 
             <motion.div
-              className="absolute inset-x-10 top-1/2 -translate-y-1/2"
+              className="absolute inset-x-5 top-1/2 h-[48%] -translate-y-1/2"
               animate={{ y: [0, -10, 0] }}
               transition={{
                 duration: 5,
@@ -102,13 +101,14 @@ export default function Hero() {
                 ease: "easeInOut",
               }}
             >
-              <div className="relative mx-auto h-36 max-w-sm transition duration-500 group-hover:scale-105">
-                <div className="absolute left-0 top-2 h-28 w-40 rounded-[45%] border-[10px] border-[#d6bd82]" />
-                <div className="absolute right-0 top-2 h-28 w-40 rounded-[45%] border-[10px] border-[#d6bd82]" />
-                <div className="absolute left-1/2 top-12 h-3 w-16 -translate-x-1/2 rounded-full bg-[#d6bd82]" />
-                <div className="absolute -left-10 top-8 h-3 w-16 -rotate-12 rounded-full bg-[#d6bd82]" />
-                <div className="absolute -right-10 top-8 h-3 w-16 rotate-12 rounded-full bg-[#d6bd82]" />
-              </div>
+              <Image
+                src="/images/products/persol-gold-sun.webp"
+                alt="Lunettes de soleil LOZA Optique"
+                fill
+                priority
+                sizes="(max-width: 1024px) 90vw, 45vw"
+                className="object-contain drop-shadow-2xl transition duration-700 group-hover:scale-105"
+              />
             </motion.div>
 
             <div className="absolute bottom-8 left-8 right-8 flex items-end justify-between border-t border-white/20 pt-6 text-white">
