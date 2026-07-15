@@ -1,6 +1,14 @@
-export const BASE_PATH =
-  process.env.NODE_ENV === "production" ? "/loza-optique" : "";
+﻿export function withBasePath(path: string): string {
+  if (!path) {
+    return "";
+  }
 
-export function withBasePath(path: string) {
-  return `${BASE_PATH}${path}`;
+  if (
+    path.startsWith("http://") ||
+    path.startsWith("https://")
+  ) {
+    return path;
+  }
+
+  return path.startsWith("/") ? path : `/${path}`;
 }
