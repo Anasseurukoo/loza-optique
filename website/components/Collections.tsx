@@ -1,8 +1,11 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { Heart } from "lucide-react";
+import Image from "next/image";
 import { useMemo, useState } from "react";
-import ProductCard, { Product } from "./ProductCard";
+import { accessories, products } from "../lib/products";
+import ProductCard from "./ProductCard";
 
 type Filter =
   | "tous"
@@ -19,70 +22,6 @@ const filters: Array<{ id: Filter; label: string }> = [
   { id: "vue", label: "Lunettes de vue" },
   { id: "soleil", label: "Lunettes de soleil" },
   { id: "accessoires", label: "Accessoires" },
-];
-
-const products: Product[] = [
-  {
-    id: 1,
-    name: "Ida",
-    reference: "PO1018S",
-    category: "soleil",
-    audience: ["homme", "femme"],
-    image: "/images/products/persol-gold-sun.webp",
-    hoverImage: "/images/lifestyle/persol-men-alpine.webp",
-    color: "Métal doré · Verres gris",
-    badge: "Signature",
-  },
-  {
-    id: 2,
-    name: "Terra",
-    reference: "PO3218V",
-    category: "vue",
-    audience: ["homme", "femme"],
-    image: "/images/products/persol-blue-optical.webp",
-    color: "Acétate bleu · Verres optiques",
-  },
-  {
-    id: 3,
-    name: "Horizon",
-    reference: "PO3235S",
-    category: "soleil",
-    audience: ["homme", "femme"],
-    image: "/images/products/persol-tortoise-sun.webp",
-    hoverImage: "/images/lifestyle/persol-women-round.webp",
-    color: "Écaille havane · Verres verts",
-    dark: true,
-  },
-  {
-    id: 4,
-    name: "Verde",
-    reference: "PO3391V",
-    category: "vue",
-    audience: ["homme", "femme"],
-    image: "/images/products/persol-green-optical.webp",
-    color: "Acétate vert sauge · Verres optiques",
-  },
-  {
-    id: 5,
-    name: "Noir P",
-    reference: "PO2803S",
-    category: "soleil",
-    audience: ["homme"],
-    image: "/images/products/persol-black-sun.webp",
-    hoverImage: "/images/lifestyle/persol-men-round.webp",
-    color: "Noir brillant · Verres polarisés",
-    badge: "Polarized",
-  },
-  {
-    id: 6,
-    name: "Cinema",
-    reference: "PO3396S",
-    category: "soleil",
-    audience: ["homme", "femme"],
-    image: "/images/products/persol-black-gradient.webp",
-    hoverImage: "/images/lifestyle/persol-women-alpine.webp",
-    color: "Noir · Verres dégradés",
-  },
 ];
 
 export default function Collections() {
@@ -135,9 +74,9 @@ export default function Collections() {
           </div>
 
           <p className="max-w-md leading-7 text-[#526b6c]">
-            Une sélection de démonstration destinée à présenter l’expérience
-            digitale de LOZA Optique. Les collections définitives seront
-            ajoutées avec les produits réellement disponibles en magasin.
+            Une sélection de démonstration. Les modèles définitifs seront
+            remplacés par les collections réellement disponibles chez LOZA
+            Optique.
           </p>
         </motion.div>
 
@@ -154,12 +93,6 @@ export default function Collections() {
               }`}
             >
               {filter.label}
-
-              {filter.id === "accessoires" && (
-                <span className="ml-2 text-[10px] opacity-60">
-                  Bientôt
-                </span>
-              )}
             </button>
           ))}
         </div>
@@ -168,20 +101,46 @@ export default function Collections() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="mt-12 rounded-[2rem] border border-[#103943]/10 bg-white/50 px-8 py-20 text-center"
+            className="mt-12 grid gap-6 sm:grid-cols-2 xl:grid-cols-4"
           >
-            <p className="text-xs uppercase tracking-[0.35em] text-[#a27d38]">
-              Accessoires
-            </p>
+            {accessories.map((accessory) => (
+              <article
+                key={accessory.id}
+                className="group overflow-hidden rounded-[1.75rem] border border-[#103943]/10 bg-white shadow-sm transition duration-500 hover:-translate-y-2 hover:shadow-xl"
+              >
+                <div className="relative aspect-square overflow-hidden bg-[#f3f3f1]">
+                  <button
+                    type="button"
+                    aria-label={`Ajouter ${accessory.name} aux favoris`}
+                    className="absolute right-4 top-4 z-20 rounded-full bg-white p-3 text-[#103943] shadow-sm"
+                  >
+                    <Heart size={17} />
+                  </button>
 
-            <h3 className="mt-5 text-3xl font-semibold">
-              Étuis, kits d’entretien et cordons
-            </h3>
+                  <Image
+                    src={accessory.image}
+                    alt={accessory.name}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 25vw"
+                    className="object-contain p-7 transition duration-700 group-hover:scale-110"
+                  />
+                </div>
 
-            <p className="mx-auto mt-4 max-w-xl leading-7 text-[#526b6c]">
-              Cette sélection sera ajoutée après confirmation des accessoires
-              disponibles chez LOZA Optique.
-            </p>
+                <div className="p-5">
+                  <p className="text-xs uppercase tracking-[0.25em] text-[#a27d38]">
+                    Accessoire
+                  </p>
+
+                  <h3 className="mt-3 text-lg font-semibold">
+                    {accessory.name}
+                  </h3>
+
+                  <p className="mt-2 text-sm leading-6 text-[#6c7d7b]">
+                    {accessory.description}
+                  </p>
+                </div>
+              </article>
+            ))}
           </motion.div>
         ) : (
           <motion.div
@@ -190,7 +149,7 @@ export default function Collections() {
           >
             <AnimatePresence mode="popLayout">
               {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard key={product.slug} product={product} />
               ))}
             </AnimatePresence>
           </motion.div>
