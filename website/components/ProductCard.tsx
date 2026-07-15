@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import type { Product } from "../lib/products";
+import { withBasePath } from "../lib/site";
 
 type ProductCardProps = {
   product: Product;
@@ -14,8 +15,11 @@ type ProductCardProps = {
 export default function ProductCard({ product }: ProductCardProps) {
   const [favorite, setFavorite] = useState(false);
 
-  const mainImage = product.images[0];
-  const hoverImage = product.images[1];
+  const mainImage = withBasePath(product.images[0]);
+
+  const hoverImage = product.images[1]
+    ? withBasePath(product.images[1])
+    : undefined;
 
   return (
     <motion.article
@@ -31,7 +35,10 @@ export default function ProductCard({ product }: ProductCardProps) {
         type="button"
         aria-label={`Ajouter ${product.name} aux favoris`}
         aria-pressed={favorite}
-        onClick={() => setFavorite((current) => !current)}
+        onClick={(event) => {
+          event.preventDefault();
+          setFavorite((current) => !current);
+        }}
         className={`absolute right-5 top-5 z-30 rounded-full p-3 shadow-sm transition hover:scale-110 ${
           favorite
             ? "bg-[#103943] text-white"

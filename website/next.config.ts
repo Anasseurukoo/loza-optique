@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   trailingSlash: true,
 
   basePath: isProduction ? `/${repoName}` : "",
+
   assetPrefix: isProduction ? `/${repoName}/` : "",
 
   images: {

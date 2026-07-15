@@ -3,6 +3,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import { withBasePath } from "../lib/site";
 
 type ProductGalleryProps = {
   images: string[];
@@ -31,7 +32,7 @@ export default function ProductGallery({
     <div>
       <div className="group relative aspect-square overflow-hidden rounded-[2.5rem] bg-[#eee8dc]">
         <Image
-          src={images[activeIndex]}
+          src={withBasePath(images[activeIndex])}
           alt={`${name} — image ${activeIndex + 1}`}
           fill
           priority={activeIndex === 0}
@@ -72,7 +73,7 @@ export default function ProductGallery({
         <div className="mt-4 grid grid-cols-3 gap-4">
           {images.map((image, index) => (
             <button
-              key={image}
+              key={`${image}-${index}`}
               type="button"
               onClick={() => setActiveIndex(index)}
               className={`relative aspect-square overflow-hidden rounded-2xl border-2 bg-[#eee8dc] transition ${
@@ -82,11 +83,13 @@ export default function ProductGallery({
               }`}
             >
               <Image
-                src={image}
+                src={withBasePath(image)}
                 alt={`${name} miniature ${index + 1}`}
                 fill
                 sizes="150px"
-                className={index === 0 ? "object-contain p-3" : "object-cover"}
+                className={
+                  index === 0 ? "object-contain p-3" : "object-cover"
+                }
               />
             </button>
           ))}

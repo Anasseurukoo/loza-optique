@@ -5,6 +5,7 @@ import { Heart } from "lucide-react";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { accessories, products } from "../lib/products";
+import { withBasePath } from "../lib/site";
 import ProductCard from "./ProductCard";
 
 type Filter =
@@ -118,7 +119,7 @@ export default function Collections() {
                   </button>
 
                   <Image
-                    src={accessory.image}
+                    src={withBasePath(accessory.image)}
                     alt={accessory.name}
                     fill
                     sizes="(max-width: 768px) 100vw, 25vw"
