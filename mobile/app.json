@@ -2,24 +2,29 @@
   "expo": {
     "name": "Loza Optique",
     "slug": "loza-optique-mobile",
-    "version": "1.0.0",
+    "version": "0.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "lozaoptique",
-    "userInterfaceStyle": "light",
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.lozaoptique.mobile"
-    },
+    "userInterfaceStyle": "automatic",
+    "plugins": [],
     "android": {
       "package": "com.lozaoptique.mobile",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#071315",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": ["CAMERA"]
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.lozaoptique.mobile",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Loza Optique utilise la caméra pour l'essayage virtuel de lunettes."
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
