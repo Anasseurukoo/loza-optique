@@ -31,7 +31,7 @@ const contactLinks = [
   },
   {
     name: "Email",
-    href: "mailto:lozaoptiqque@gmail.com",
+    href: "mailto:lozaoptique@gmail.com",
     icon: Mail,
   },
 ];
