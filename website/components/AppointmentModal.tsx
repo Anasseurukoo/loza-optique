@@ -97,7 +97,7 @@ export default function AppointmentModal({
             </p>
 
             <a
-              href={`mailto:lozaoptiqque@gmail.com?subject=Demande de rendez-vous LOZA Optique&body=Nom : ${encodeURIComponent(
+              href={`mailto:lozaoptique@gmail.com?subject=Demande de rendez-vous LOZA Optique&body=Nom : ${encodeURIComponent(
                 name,
               )}%0ATéléphone : ${encodeURIComponent(
                 telephone,
