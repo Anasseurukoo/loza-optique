@@ -1,556 +1,93 @@
 import { StatusBar } from 'expo-status-bar';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import {
-  Image,
-  type ImageSourcePropType,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
+  Animated, Dimensions, Image, ImageBackground, Modal, Pressable, ScrollView,
+  StyleSheet, Text, TextInput, View,
 } from 'react-native';
+import TryOnScreen from './src/TryOnScreen';
+import { accessories, catalogue, eyewear, lifestyle, type CatalogueItem, type Category } from './src/data';
 
-type Tab = 'home' | 'catalogue' | 'favorites' | 'appointment' | 'profile';
-type Category = 'Tous' | 'Vue' | 'Soleil' | 'Femme' | 'Homme';
-
-type Product = {
-  id: number;
-  name: string;
-  brand: string;
-  category: 'Vue' | 'Soleil';
-  audience: ('Homme' | 'Femme')[];
-  reference: string;
-  image: ImageSourcePropType;
-  accent: string;
-};
-
-const COLORS = {
-  petrol: '#103943',
-  deep: '#071D22',
-  gold: '#D6BD82',
-  goldDark: '#A27D38',
-  ivory: '#F6F1E7',
-  white: '#FFFDFC',
-  sage: '#6C7D7B',
-  ink: '#102F36',
-  muted: '#667B7E',
-  line: '#DED8CB',
-};
-
-const products: Product[] = [
-  {
-    id: 1,
-    name: 'Alpine Signature',
-    brand: 'COLLECTION SIGNATURE',
-    category: 'Soleil',
-    audience: ['Homme', 'Femme'],
-    reference: 'DÉMO-001',
-    image: require('./assets/products/persol-alpine-sun.webp'),
-    accent: '#E8D4B3',
-  },
-  {
-    id: 2,
-    name: 'Noir Carré',
-    brand: 'NOUVEAU',
-    category: 'Soleil',
-    audience: ['Homme', 'Femme'],
-    reference: 'DÉMO-002',
-    image: require('./assets/products/persol-black-square.webp'),
-    accent: '#CDD5D3',
-  },
-  {
-    id: 3,
-    name: 'Ida Dorée',
-    brand: 'LOZA OPTIQUE',
-    category: 'Soleil',
-    audience: ['Homme', 'Femme'],
-    reference: 'DÉMO-003',
-    image: require('./assets/products/persol-gold-sun.webp'),
-    accent: '#E6CFA7',
-  },
-  {
-    id: 4,
-    name: 'Indigo Optical',
-    brand: 'LOZA OPTIQUE',
-    category: 'Vue',
-    audience: ['Homme', 'Femme'],
-    reference: 'DÉMO-004',
-    image: require('./assets/products/persol-blue-optical.webp'),
-    accent: '#D8E1DE',
-  },
-  {
-    id: 5,
-    name: 'Sauge Optical',
-    brand: 'LOZA OPTIQUE',
-    category: 'Vue',
-    audience: ['Homme', 'Femme'],
-    reference: 'DÉMO-005',
-    image: require('./assets/products/persol-green-optical.webp'),
-    accent: '#DDE4D8',
-  },
-  {
-    id: 6,
-    name: 'Havane Solaire',
-    brand: 'LOZA OPTIQUE',
-    category: 'Soleil',
-    audience: ['Homme', 'Femme'],
-    reference: 'DÉMO-006',
-    image: require('./assets/products/persol-tortoise-sun.webp'),
-    accent: '#E8DAC5',
-  },
-  {
-    id: 7,
-    name: 'Polar Noir',
-    brand: 'POLARISÉ',
-    category: 'Soleil',
-    audience: ['Homme'],
-    reference: 'DÉMO-007',
-    image: require('./assets/products/persol-black-sun.webp'),
-    accent: '#D6D9D7',
-  },
-  {
-    id: 8,
-    name: 'Noir Dégradé',
-    brand: 'LOZA OPTIQUE',
-    category: 'Soleil',
-    audience: ['Homme', 'Femme'],
-    reference: 'DÉMO-008',
-    image: require('./assets/products/persol-black-gradient.webp'),
-    accent: '#D4D5D2',
-  },
+type Tab = 'home' | 'shop' | 'saved' | 'booking' | 'profile';
+const W = Dimensions.get('window').width;
+const C = { bg:'#F4F0E7', paper:'#FFFCF6', ink:'#101515', petrol:'#0A292C', petrol2:'#174B4D', gold:'#B8995A', muted:'#737C78', line:'#DDD8CD', white:'#FFF', red:'#C65D50' };
+const tabs:{key:Tab;icon:string;label:string}[]=[
+  {key:'home',icon:'⌂',label:'Accueil'},{key:'shop',icon:'⌕',label:'Boutique'},
+  {key:'saved',icon:'♡',label:'Favoris'},{key:'booking',icon:'◷',label:'Rendez-vous'},
+  {key:'profile',icon:'○',label:'Profil'},
 ];
 
-const tabs: { key: Tab; label: string; icon: string }[] = [
-  { key: 'home', label: 'Accueil', icon: '⌂' },
-  { key: 'catalogue', label: 'Catalogue', icon: '▦' },
-  { key: 'favorites', label: 'Favoris', icon: '♡' },
-  { key: 'appointment', label: 'RDV', icon: '◷' },
-  { key: 'profile', label: 'Profil', icon: '○' },
-];
+function Logo({light=false}:{light?:boolean}) { return <View><Text style={[s.logo,light&&s.light]}>LOZA</Text><Text style={[s.logoSub,light&&s.logoSubLight]}>OPTIQUE · CASABLANCA</Text></View> }
+function Header({title,onSearch}:{title?:string;onSearch:()=>void}) { return <View style={s.header}><Logo/>{title?<Text style={s.headerTitle}>{title}</Text>:null}<View style={s.headerButtons}><Pressable onPress={onSearch} style={s.headerButton}><Text style={s.headerButtonText}>⌕</Text></Pressable><View style={s.headerAvatar}><Text style={s.headerAvatarText}>L</Text></View></View></View> }
 
-const categories: Category[] = ['Tous', 'Vue', 'Soleil', 'Femme', 'Homme'];
-
-function Brand({ light = false }: { light?: boolean }) {
-  return (
-    <View>
-      <Text style={[styles.brand, light && { color: COLORS.ivory }]}>LOZA</Text>
-      <View style={styles.brandRow}>
-        <View style={styles.brandLine} />
-        <Text style={[styles.brandSub, light && { color: COLORS.gold }]}>OPTIQUE</Text>
-        <View style={styles.brandLine} />
-      </View>
-    </View>
-  );
-}
-
-function ProductCard({
-  product,
-  favorite,
-  onFavorite,
-}: {
-  product: Product;
-  favorite: boolean;
-  onFavorite: () => void;
-}) {
-  return (
-    <View style={styles.productCard}>
-      <View style={[styles.productImageWrap, { backgroundColor: product.accent }]}>
-        <Image source={product.image} style={styles.productImage} />
-        <Pressable onPress={onFavorite} style={styles.heartButton} hitSlop={10}>
-          <Text style={[styles.heart, favorite && styles.heartActive]}>{favorite ? '♥' : '♡'}</Text>
-        </Pressable>
-      </View>
-      <Text style={styles.productBrand}>{product.brand}</Text>
-      <Text style={styles.productName}>{product.name}</Text>
-      <View style={styles.productFoot}>
-        <Text style={styles.productPrice}>{product.reference}</Text>
-        <Text style={styles.arrow}>↗</Text>
-      </View>
-    </View>
-  );
-}
-
-function SectionTitle({ eyebrow, title, action }: { eyebrow: string; title: string; action?: string }) {
-  return (
-    <View style={styles.sectionHeading}>
-      <View>
-        <Text style={styles.eyebrow}>{eyebrow}</Text>
-        <Text style={styles.sectionTitle}>{title}</Text>
-      </View>
-      {action ? <Text style={styles.sectionAction}>{action}</Text> : null}
-    </View>
-  );
+function ItemCard({item,saved,onSave,onOpen}:{item:CatalogueItem;saved:boolean;onSave:()=>void;onOpen:()=>void}) {
+  return <Pressable onPress={onOpen} style={({pressed})=>[s.itemCard,pressed&&s.pressed]}>
+    <View style={[s.itemVisual,{backgroundColor:item.color}]}><View style={s.itemHalo}/><Image source={item.image} style={s.itemImage}/><Pressable onPress={onSave} hitSlop={10} style={s.heart}><Text style={[s.heartText,saved&&s.heartOn]}>{saved?'♥':'♡'}</Text></Pressable>{item.tryOn?<View style={s.arBadge}><Text style={s.arBadgeText}>AR</Text></View>:null}</View>
+    <Text style={s.itemLabel}>{item.label}</Text><Text style={s.itemName}>{item.name}</Text>
+  </Pressable>
 }
 
 function AppContent() {
-  const [activeTab, setActiveTab] = useState<Tab>('home');
-  const [category, setCategory] = useState<Category>('Tous');
-  const [query, setQuery] = useState('');
-  const [favorites, setFavorites] = useState<number[]>([1]);
-  const [selectedDay, setSelectedDay] = useState('18');
-  const [selectedTime, setSelectedTime] = useState('16:00');
-  const [confirmed, setConfirmed] = useState(false);
+  const [tab,setTab]=useState<Tab>('home'); const [category,setCategory]=useState<Category>('Tout');
+  const [query,setQuery]=useState(''); const [favorites,setFavorites]=useState<string[]>(['p2','a2']);
+  const [selected,setSelected]=useState<CatalogueItem|null>(null); const [tryOn,setTryOn]=useState<CatalogueItem|null>(null);
+  const [search,setSearch]=useState(false); const [day,setDay]=useState('18'); const [time,setTime]=useState('15:30'); const [confirmed,setConfirmed]=useState(false);
+  const fade=useRef(new Animated.Value(1)).current;
+  useEffect(()=>{fade.setValue(.2);Animated.timing(fade,{toValue:1,duration:280,useNativeDriver:true}).start()},[tab]);
+  const toggle=(id:string)=>setFavorites(v=>v.includes(id)?v.filter(x=>x!==id):[...v,id]);
+  const filtered=useMemo(()=>catalogue.filter(x=>(category==='Tout'||x.category===category)&&`${x.name} ${x.label} ${x.category}`.toLowerCase().includes(query.toLowerCase())),[category,query]);
+  if(tryOn) return <TryOnScreen initial={tryOn} onClose={()=>setTryOn(null)}/>;
 
-  const filtered = useMemo(() => {
-    return products.filter((product) => {
-      const categoryMatch =
-        category === 'Tous' || product.category === category || product.audience.includes(category as 'Homme' | 'Femme');
-      const queryMatch = `${product.name} ${product.brand}`.toLowerCase().includes(query.toLowerCase());
-      return categoryMatch && queryMatch;
-    });
-  }, [category, query]);
+  const Home=()=> <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.page}>
+    <Header onSearch={()=>setSearch(true)}/>
+    <ImageBackground source={require('./assets/lifestyle/persol-alpine-women.webp')} style={s.hero} imageStyle={s.heroImage}>
+      <View style={s.heroShade}/><View style={s.heroMeta}><Text style={s.heroMetaText}>THE LOZA EDIT · 02</Text><Text style={s.heroMetaText}>2026</Text></View>
+      <View><Text style={s.heroKicker}>NOUVELLE SAISON</Text><Text style={s.heroTitle}>La forme{`\n`}du regard.</Text><Text style={s.heroCopy}>Une sélection personnelle, précise et essentielle.</Text><View style={s.heroActions}><Pressable onPress={()=>setTab('shop')} style={s.heroButton}><Text style={s.heroButtonText}>DÉCOUVRIR</Text><Text style={s.heroArrow}>↗</Text></Pressable><Pressable onPress={()=>setTryOn(eyewear[0])} style={s.arHero}><Text style={s.arHeroText}>◎  ESSAYER EN AR</Text></Pressable></View></View>
+    </ImageBackground>
+    <View style={s.sectionHead}><View><Text style={s.eyebrow}>SÉLECTION LOZA</Text><Text style={s.sectionTitle}>Nouveautés</Text></View><Pressable onPress={()=>setTab('shop')}><Text style={s.sectionLink}>Tout voir  ↗</Text></Pressable></View>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.row}>{eyewear.slice(0,5).map(i=><ItemCard key={i.id} item={i} saved={favorites.includes(i.id)} onSave={()=>toggle(i.id)} onOpen={()=>setSelected(i)}/>)}</ScrollView>
+    <Pressable onPress={()=>{setCategory('Accessoire');setTab('shop')}} style={s.darkFeature}><View style={s.featureText}><Text style={s.featureKicker}>LES DÉTAILS COMPTENT</Text><Text style={s.featureTitle}>Accessoires{`\n`}du quotidien.</Text><Text style={s.featureCopy}>Protection, entretien et style. Les essentiels Loza.</Text><Text style={s.featureLink}>EXPLORER  →</Text></View><Image source={accessories[1].image} style={s.featureImage}/></Pressable>
+    <View style={s.sectionHead}><View><Text style={s.eyebrow}>INSPIRATIONS</Text><Text style={s.sectionTitle}>Le style en vue</Text></View><Text style={s.sectionCount}>08 ÉDITOS</Text></View>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.storyRow}>{lifestyle.map((story,index)=><View key={story.id} style={s.story}><Image source={story.image} style={s.storyImage}/><View style={s.storyShade}/><Text style={s.storyNumber}>0{index+1}</Text><Text style={s.storyTitle}>{story.title}</Text></View>)}</ScrollView>
+    <View style={s.transition}><Image source={require('./assets/hero-transitions.webp')} style={s.transitionImage}/><View style={s.transitionCopy}><Text style={s.transitionKicker}>SAVOIR-FAIRE</Text><Text style={s.transitionTitle}>Votre vision mérite du temps.</Text><Text style={s.transitionText}>Conseil personnalisé et ajustage en boutique à Casablanca.</Text></View></View>
+  </ScrollView>;
 
-  const toggleFavorite = (id: number) => {
-    setFavorites((current) =>
-      current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
-    );
-  };
+  const Shop=()=> <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.page}>
+    <Header title="Boutique" onSearch={()=>setSearch(true)}/><Text style={s.screenTitle}>Lunettes &{`\n`}accessoires.</Text>
+    <Pressable onPress={()=>setSearch(true)} style={s.searchBox}><Text style={s.searchIcon}>⌕</Text><Text style={s.searchPlaceholder}>{query||'Que recherchez-vous ?'}</Text><Text style={s.searchTune}>☷</Text></Pressable>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.categories}>{(['Tout','Vue','Solaire','Accessoire'] as Category[]).map(c=><Pressable key={c} onPress={()=>setCategory(c)} style={[s.category,category===c&&s.categoryOn]}><Text style={[s.categoryText,category===c&&s.categoryTextOn]}>{c}</Text></Pressable>)}</ScrollView>
+    <View style={s.resultHead}><Text style={s.resultCount}>{filtered.length} ARTICLES</Text><Text style={s.resultSort}>Sélection Loza  ⌄</Text></View><View style={s.grid}>{filtered.map(i=><ItemCard key={i.id} item={i} saved={favorites.includes(i.id)} onSave={()=>toggle(i.id)} onOpen={()=>setSelected(i)}/>)}</View>
+  </ScrollView>;
 
-  const catalogue = (items: Product[], emptyMessage?: string) => (
-    <View style={styles.grid}>
-      {items.map((product) => (
-        <ProductCard
-          key={product.id}
-          product={product}
-          favorite={favorites.includes(product.id)}
-          onFavorite={() => toggleFavorite(product.id)}
-        />
-      ))}
-      {!items.length ? (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyIcon}>◇</Text>
-          <Text style={styles.emptyTitle}>{emptyMessage ?? 'Aucun résultat'}</Text>
-          <Text style={styles.emptyText}>Explorez le catalogue et ajoutez vos montures préférées.</Text>
-        </View>
-      ) : null}
-    </View>
-  );
+  const Saved=()=>{const list=catalogue.filter(x=>favorites.includes(x.id));return <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.page}><Header title="Favoris" onSearch={()=>setSearch(true)}/><Text style={s.screenTitle}>Votre{`\n`}sélection.</Text><Text style={s.intro}>Gardez ici les pièces qui vous ressemblent.</Text>{list.length?<View style={[s.grid,{marginTop:25}]}>{list.map(i=><ItemCard key={i.id} item={i} saved onSave={()=>toggle(i.id)} onOpen={()=>setSelected(i)}/>)}</View>:<View style={s.empty}><Text style={s.emptyIcon}>♡</Text><Text style={s.emptyTitle}>Votre sélection est vide</Text><Text style={s.emptyCopy}>Explorez la boutique et ajoutez vos coups de cœur.</Text><Pressable onPress={()=>setTab('shop')} style={s.petrolButton}><Text style={s.petrolButtonText}>EXPLORER</Text></Pressable></View>}</ScrollView>};
 
-  const Home = () => (
-    <>
-      <View style={styles.hero}>
-        <View style={styles.heroGlow} />
-        <Text style={styles.heroKicker}>OPTICIEN À CASABLANCA</Text>
-        <Text style={styles.heroTitle}>La vision{`\n`}autrement.</Text>
-        <Text style={styles.heroText}>Des montures sélectionnées avec précision, un conseil humain et un savoir-faire dédié au confort de chaque regard.</Text>
-        <View style={styles.heroActions}>
-          <Pressable style={styles.primaryButton} onPress={() => setActiveTab('catalogue')}>
-            <Text style={styles.primaryButtonText}>DÉCOUVRIR</Text>
-          </Pressable>
-          <Pressable style={styles.outlineButton} onPress={() => setActiveTab('appointment')}>
-            <Text style={styles.outlineButtonText}>PRENDRE RDV</Text>
-          </Pressable>
-        </View>
-        <View style={styles.glassesArt}>
-          <View style={styles.lens} />
-          <View style={styles.bridge} />
-          <View style={styles.lens} />
-        </View>
-      </View>
+  const Booking=()=> <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.page}><Header title="Rendez-vous" onSearch={()=>setSearch(true)}/><View style={s.bookingIntro}><Text style={s.bookingKicker}>EN BOUTIQUE</Text><Text style={s.bookingTitle}>Votre temps,{`\n`}rien que pour vous.</Text><Text style={s.bookingCopy}>Un conseil personnalisé dans notre boutique de Casablanca.</Text></View><View style={s.bookingCard}><View style={s.bookingTop}><Text style={s.bookingMonth}>JUILLET 2026</Text><Text style={s.bookingArrows}>‹   ›</Text></View><View style={s.days}>{[['VEN','17'],['SAM','18'],['DIM','19'],['LUN','20']].map(([d,n])=><Pressable key={n} onPress={()=>setDay(n)} style={[s.day,day===n&&s.dayOn]}><Text style={[s.dayName,day===n&&s.dayTextOn]}>{d}</Text><Text style={[s.dayNum,day===n&&s.dayTextOn]}>{n}</Text></Pressable>)}</View><Text style={s.timeKicker}>HEURES DISPONIBLES</Text><View style={s.times}>{['10:00','11:30','14:00','15:30','17:00','18:30'].map(t=><Pressable key={t} onPress={()=>setTime(t)} style={[s.time,time===t&&s.timeOn]}><Text style={[s.timeText,time===t&&s.timeTextOn]}>{t}</Text></Pressable>)}</View><Pressable onPress={()=>setConfirmed(true)} style={s.bookButton}><Text style={s.bookButtonText}>CONFIRMER · {day} JUILLET À {time}</Text><Text style={s.bookButtonArrow}>→</Text></Pressable></View><View style={s.store}><View style={s.storeLogo}><Text style={s.storeLogoText}>L</Text></View><View style={{flex:1}}><Text style={s.storeName}>Loza Optique</Text><Text style={s.storeAddress}>132 Souk Korea, Bloc EF · Casablanca</Text></View><Text style={s.storeArrow}>↗</Text></View></ScrollView>;
 
-      <View style={styles.contentSection}>
-        <SectionTitle eyebrow="EXPLOREZ" title="Nos catégories" action="Voir tout  →" />
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryCards}>
-          {[
-            ['◉', 'Lunettes de vue'],
-            ['◌', 'Solaires'],
-            ['✦', 'Nouveautés'],
-            ['◇', 'Accessoires'],
-          ].map(([icon, label]) => (
-            <Pressable key={label} style={styles.categoryCard} onPress={() => setActiveTab('catalogue')}>
-              <Text style={styles.categoryIcon}>{icon}</Text>
-              <Text style={styles.categoryLabel}>{label}</Text>
-            </Pressable>
-          ))}
-        </ScrollView>
-      </View>
+  const Profile=()=> <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.page}><Header title="Profil" onSearch={()=>setSearch(true)}/><View style={s.profile}><View style={s.profileAvatar}><Text style={s.profileAvatarText}>L</Text></View><Text style={s.profileTitle}>Bienvenue chez Loza</Text><Text style={s.profileCopy}>Votre expérience optique, simplement.</Text></View>{[['♡','Mes favoris',`${favorites.length} articles`],['◷','Mes rendez-vous','Voir et modifier'],['◎','Virtual Mirror','Essayage AR en direct'],['⌖','Notre boutique','Adresse et itinéraire'],['?','Besoin d’aide ?','Contactez-nous']].map(([icon,title,copy])=><Pressable key={title} onPress={()=>title==='Virtual Mirror'&&setTryOn(eyewear[0])} style={s.menu}><Text style={s.menuIcon}>{icon}</Text><View style={{flex:1}}><Text style={s.menuTitle}>{title}</Text><Text style={s.menuCopy}>{copy}</Text></View><Text style={s.menuArrow}>›</Text></Pressable>)}<Text style={s.version}>LOZA OPTIQUE · VERSION 0.0.2 · AR</Text></ScrollView>;
 
-      <View style={styles.contentSection}>
-        <SectionTitle eyebrow="SÉLECTION LOZA" title="Coups de cœur" action="Catalogue  →" />
-        {catalogue(products.slice(0, 2))}
-      </View>
+  const screens={home:<Home/>,shop:<Shop/>,saved:<Saved/>,booking:<Booking/>,profile:<Profile/>};
+  return <SafeAreaView style={s.safe}><StatusBar style="dark"/><Animated.View style={[s.content,{opacity:fade}]}>{screens[tab]}</Animated.View>
+    <View style={s.navShell}><View style={s.nav}>{tabs.map(n=><Pressable key={n.key} onPress={()=>setTab(n.key)} style={s.navItem}><Text style={[s.navIcon,tab===n.key&&s.navIconOn]}>{n.icon}</Text><Text style={[s.navLabel,tab===n.key&&s.navLabelOn]}>{n.label}</Text>{tab===n.key?<View style={s.navDot}/>:null}</Pressable>)}</View></View>
 
-      <View style={styles.serviceBanner}>
-        <Text style={styles.serviceNumber}>01</Text>
-        <View style={styles.serviceCopy}>
-          <Text style={styles.serviceTitle}>Un conseil vraiment personnalisé</Text>
-          <Text style={styles.serviceText}>Votre confort avant tout. Nous prenons le temps de trouver la monture qui vous ressemble.</Text>
-        </View>
-      </View>
-    </>
-  );
+    <Modal visible={!!selected} transparent animationType="slide" onRequestClose={()=>setSelected(null)}>{selected?<View style={s.modalShade}><View style={s.sheet}><View style={s.handle}/><Pressable onPress={()=>setSelected(null)} style={s.close}><Text style={s.closeText}>×</Text></Pressable><View style={[s.sheetVisual,{backgroundColor:selected.color}]}><View style={s.sheetHalo}/><Image source={selected.image} style={s.sheetImage}/></View><Text style={s.sheetLabel}>{selected.label}</Text><Text style={s.sheetName}>{selected.name}</Text><Text style={s.sheetCategory}>{selected.category}</Text><Text style={s.sheetCopy}>{selected.tryOn?'Une monture sélectionnée pour son équilibre, son confort et son caractère.':'Un essentiel choisi pour protéger et accompagner vos lunettes au quotidien.'}</Text><View style={s.sheetActions}>{selected.tryOn?<Pressable onPress={()=>{setSelected(null);setTryOn(selected)}} style={s.tryButton}><Text style={s.tryButtonText}>◎  ESSAYER EN AR</Text></Pressable>:null}<Pressable onPress={()=>toggle(selected.id)} style={s.saveButton}><Text style={s.saveButtonText}>{favorites.includes(selected.id)?'♥  AJOUTÉ':'♡  FAVORI'}</Text></Pressable></View></View></View>:null}</Modal>
 
-  const Catalogue = () => (
-    <View style={styles.contentSection}>
-      <SectionTitle eyebrow="COLLECTION 2026" title="Le catalogue" />
-      <View style={styles.searchBox}>
-        <Text style={styles.searchIcon}>⌕</Text>
-        <TextInput
-          value={query}
-          onChangeText={setQuery}
-          placeholder="Rechercher une monture"
-          placeholderTextColor={COLORS.muted}
-          style={styles.searchInput}
-        />
-      </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
-        {categories.map((item) => (
-          <Pressable
-            key={item}
-            onPress={() => setCategory(item)}
-            style={[styles.filter, category === item && styles.filterActive]}
-          >
-            <Text style={[styles.filterText, category === item && styles.filterTextActive]}>{item}</Text>
-          </Pressable>
-        ))}
-      </ScrollView>
-      <Text style={styles.results}>{filtered.length} MONTURES</Text>
-      {catalogue(filtered)}
-    </View>
-  );
-
-  const Appointment = () => {
-    const days = ['15', '16', '17', '18', '19', '20', '21'];
-    const times = ['10:00', '11:30', '14:00', '16:00', '17:30'];
-    return (
-      <View style={styles.contentSection}>
-        <SectionTitle eyebrow="À VOTRE SERVICE" title="Prendre rendez-vous" />
-        <Text style={styles.pageLead}>Choisissez le moment qui vous convient. Notre équipe vous accueillera pour un conseil personnalisé.</Text>
-        <View style={styles.appointmentCard}>
-          <View style={styles.monthRow}>
-            <Text style={styles.monthArrow}>‹</Text>
-            <Text style={styles.month}>JUILLET 2026</Text>
-            <Text style={styles.monthArrow}>›</Text>
-          </View>
-          <View style={styles.daysRow}>
-            {days.map((day, index) => (
-              <Pressable key={day} onPress={() => setSelectedDay(day)} style={[styles.day, selectedDay === day && styles.dayActive]}>
-                <Text style={[styles.dayName, selectedDay === day && styles.dayTextActive]}>{['M', 'J', 'V', 'S', 'D', 'L', 'M'][index]}</Text>
-                <Text style={[styles.dayNumber, selectedDay === day && styles.dayTextActive]}>{day}</Text>
-              </Pressable>
-            ))}
-          </View>
-          <Text style={styles.fieldLabel}>HEURE DISPONIBLE</Text>
-          <View style={styles.timeGrid}>
-            {times.map((time) => (
-              <Pressable key={time} onPress={() => setSelectedTime(time)} style={[styles.time, selectedTime === time && styles.timeActive]}>
-                <Text style={[styles.timeText, selectedTime === time && styles.timeTextActive]}>{time}</Text>
-              </Pressable>
-            ))}
-          </View>
-          <Pressable style={styles.confirmButton} onPress={() => setConfirmed(true)}>
-            <Text style={styles.confirmButtonText}>CONFIRMER LE RENDEZ-VOUS</Text>
-          </Pressable>
-        </View>
-        <View style={styles.infoCard}>
-          <Text style={styles.infoIcon}>⌖</Text>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.infoTitle}>Loza Optique — Casablanca</Text>
-            <Text style={styles.infoText}>132, Souk Korea, Bloc EF · Lun–Sam, 09:30–19:00</Text>
-          </View>
-        </View>
-      </View>
-    );
-  };
-
-  const Profile = () => (
-    <View style={styles.contentSection}>
-      <SectionTitle eyebrow="MON ESPACE" title="Bienvenue chez Loza" />
-      <View style={styles.profileHero}>
-        <View style={styles.profileMark}><Text style={styles.profileMarkText}>L</Text></View>
-        <Text style={styles.profileTitle}>Votre vision, bien accompagnée.</Text>
-        <Text style={styles.profileText}>Connectez-vous prochainement pour suivre vos commandes, ordonnances et rendez-vous.</Text>
-        <Pressable style={styles.primaryWide}><Text style={styles.primaryWideText}>CRÉER MON COMPTE</Text></Pressable>
-      </View>
-      {[
-        ['◷', 'Mes rendez-vous'],
-        ['▢', 'Mes ordonnances'],
-        ['◎', 'Contacter la boutique'],
-        ['?', 'Aide et informations'],
-      ].map(([icon, label]) => (
-        <Pressable key={label} style={styles.menuRow}>
-          <Text style={styles.menuIcon}>{icon}</Text>
-          <Text style={styles.menuLabel}>{label}</Text>
-          <Text style={styles.menuArrow}>›</Text>
-        </Pressable>
-      ))}
-    </View>
-  );
-
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar style={activeTab === 'home' ? 'light' : 'dark'} />
-      <View style={[styles.header, activeTab === 'home' && styles.headerDark]}>
-        <Brand light={activeTab === 'home'} />
-        <Pressable style={styles.headerAction}>
-          <Text style={[styles.headerActionText, activeTab === 'home' && { color: COLORS.ivory }]}>FR  ·  ♡</Text>
-        </Pressable>
-      </View>
-
-      <ScrollView style={styles.screen} showsVerticalScrollIndicator={false} contentContainerStyle={styles.screenContent}>
-        {activeTab === 'home' && <Home />}
-        {activeTab === 'catalogue' && <Catalogue />}
-        {activeTab === 'favorites' && (
-          <View style={styles.contentSection}>
-            <SectionTitle eyebrow="VOTRE SÉLECTION" title="Mes favoris" />
-            {catalogue(products.filter((product) => favorites.includes(product.id)), 'Aucun favori pour le moment')}
-          </View>
-        )}
-        {activeTab === 'appointment' && <Appointment />}
-        {activeTab === 'profile' && <Profile />}
-      </ScrollView>
-
-      <View style={styles.tabBar}>
-        {tabs.map((tab) => {
-          const active = tab.key === activeTab;
-          return (
-            <Pressable key={tab.key} style={styles.tab} onPress={() => setActiveTab(tab.key)}>
-              <Text style={[styles.tabIcon, active && styles.tabActive]}>{active && tab.icon === '♡' ? '♥' : tab.icon}</Text>
-              <Text style={[styles.tabLabel, active && styles.tabActive]}>{tab.label}</Text>
-              {active ? <View style={styles.tabDot} /> : null}
-            </Pressable>
-          );
-        })}
-      </View>
-
-      <Modal visible={confirmed} transparent animationType="fade" onRequestClose={() => setConfirmed(false)}>
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalCard}>
-            <View style={styles.successMark}><Text style={styles.successMarkText}>✓</Text></View>
-            <Text style={styles.modalEyebrow}>DEMANDE ENREGISTRÉE</Text>
-            <Text style={styles.modalTitle}>Rendez-vous demandé</Text>
-            <Text style={styles.modalText}>Le {selectedDay} juillet à {selectedTime}. La boutique vous contactera pour confirmer.</Text>
-            <Pressable style={styles.confirmButton} onPress={() => setConfirmed(false)}>
-              <Text style={styles.confirmButtonText}>TERMINER</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
-    </SafeAreaView>
-  );
+    <Modal visible={search} animationType="fade" onRequestClose={()=>setSearch(false)}><SafeAreaView style={s.searchPage}><StatusBar style="dark"/><View style={s.searchTop}><Pressable onPress={()=>setSearch(false)}><Text style={s.searchBack}>‹</Text></Pressable><TextInput autoFocus value={query} onChangeText={setQuery} placeholder="Rechercher" placeholderTextColor={C.muted} style={s.searchInput}/><Pressable onPress={()=>setQuery('')}><Text style={s.searchClear}>×</Text></Pressable></View><ScrollView contentContainerStyle={s.searchResults}><Text style={s.searchTip}>LUNETTES · ACCESSOIRES · COLLECTIONS</Text>{query?<View style={s.grid}>{catalogue.filter(i=>`${i.name} ${i.label} ${i.category}`.toLowerCase().includes(query.toLowerCase())).map(i=><ItemCard key={i.id} item={i} saved={favorites.includes(i.id)} onSave={()=>toggle(i.id)} onOpen={()=>{setSearch(false);setSelected(i)}}/>)}</View>:<>{['Lunettes solaires','Étuis en cuir','Kit entretien','Montures de vue'].map(x=><Text key={x} style={s.suggestion}>{x}  ↗</Text>)}</>}</ScrollView></SafeAreaView></Modal>
+    <Modal visible={confirmed} transparent animationType="fade"><View style={s.confirmShade}><View style={s.confirmCard}><View style={s.confirmIcon}><Text style={s.confirmIconText}>✓</Text></View><Text style={s.confirmKicker}>C’EST CONFIRMÉ</Text><Text style={s.confirmTitle}>À bientôt chez Loza.</Text><Text style={s.confirmCopy}>Votre rendez-vous est prévu le {day} juillet à {time}.</Text><Pressable onPress={()=>setConfirmed(false)} style={s.petrolButton}><Text style={s.petrolButtonText}>TERMINER</Text></Pressable></View></View></Modal>
+  </SafeAreaView>
 }
 
-export default function App() {
-  return (
-    <SafeAreaProvider>
-      <AppContent />
-    </SafeAreaProvider>
-  );
-}
+export default function App(){return <SafeAreaProvider><AppContent/></SafeAreaProvider>}
 
-const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORS.white },
-  screen: { flex: 1 },
-  screenContent: { paddingBottom: 36 },
-  header: { height: 76, paddingHorizontal: 22, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: COLORS.white, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: COLORS.line },
-  headerDark: { backgroundColor: COLORS.deep, borderBottomColor: '#1A4148' },
-  headerAction: { padding: 8 },
-  headerActionText: { color: COLORS.ink, fontSize: 13, letterSpacing: 1 },
-  brand: { fontSize: 25, lineHeight: 26, letterSpacing: 8, color: COLORS.petrol, fontWeight: '600' },
-  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 3 },
-  brandSub: { fontSize: 7, letterSpacing: 4, color: COLORS.goldDark },
-  brandLine: { width: 18, height: 1, backgroundColor: COLORS.gold },
-  hero: { minHeight: 510, backgroundColor: COLORS.deep, paddingHorizontal: 24, paddingTop: 58, overflow: 'hidden' },
-  heroGlow: { position: 'absolute', width: 340, height: 340, borderRadius: 170, backgroundColor: '#154A54', opacity: 0.55, right: -150, bottom: -40 },
-  heroKicker: { color: COLORS.gold, fontSize: 11, letterSpacing: 4, marginBottom: 16 },
-  heroTitle: { color: COLORS.ivory, fontSize: 43, lineHeight: 50, fontWeight: '300', letterSpacing: -1.2, maxWidth: 330 },
-  heroText: { color: '#BFCBC9', fontSize: 15, lineHeight: 23, maxWidth: 310, marginTop: 18 },
-  heroActions: { flexDirection: 'row', gap: 10, marginTop: 28 },
-  primaryButton: { backgroundColor: COLORS.gold, paddingVertical: 15, paddingHorizontal: 22 },
-  primaryButtonText: { color: COLORS.deep, fontSize: 11, fontWeight: '700', letterSpacing: 1.8 },
-  outlineButton: { borderWidth: 1, borderColor: '#577178', paddingVertical: 14, paddingHorizontal: 18 },
-  outlineButtonText: { color: COLORS.ivory, fontSize: 11, fontWeight: '600', letterSpacing: 1.5 },
-  glassesArt: { position: 'absolute', right: 16, bottom: 40, flexDirection: 'row', alignItems: 'center', opacity: 0.28 },
-  lens: { width: 92, height: 65, borderWidth: 3, borderColor: COLORS.gold, borderRadius: 20 },
-  bridge: { width: 25, height: 12, borderTopWidth: 3, borderColor: COLORS.gold, marginHorizontal: -2 },
-  contentSection: { paddingHorizontal: 20, paddingTop: 30 },
-  sectionHeading: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 20 },
-  eyebrow: { color: COLORS.goldDark, fontSize: 10, letterSpacing: 2.7, fontWeight: '700', marginBottom: 7 },
-  sectionTitle: { color: COLORS.ink, fontSize: 29, fontWeight: '400', letterSpacing: -0.7 },
-  sectionAction: { color: COLORS.petrol, fontSize: 12, fontWeight: '600', paddingBottom: 5 },
-  categoryCards: { gap: 11, paddingRight: 20 },
-  categoryCard: { width: 126, height: 126, backgroundColor: COLORS.ivory, padding: 16, justifyContent: 'space-between', borderWidth: 1, borderColor: '#ECE6DA' },
-  categoryIcon: { fontSize: 30, color: COLORS.goldDark },
-  categoryLabel: { color: COLORS.ink, fontSize: 14, fontWeight: '600', lineHeight: 19 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  productCard: { width: '48%', marginBottom: 12 },
-  productImageWrap: { aspectRatio: 0.92, overflow: 'hidden', marginBottom: 12 },
-  productImage: { width: '100%', height: '100%', resizeMode: 'cover' },
-  heartButton: { position: 'absolute', top: 9, right: 9, width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(255,255,255,.9)', alignItems: 'center', justifyContent: 'center' },
-  heart: { color: COLORS.petrol, fontSize: 19 },
-  heartActive: { color: COLORS.goldDark },
-  productBrand: { color: COLORS.goldDark, fontSize: 8, letterSpacing: 1.4, fontWeight: '700' },
-  productName: { color: COLORS.ink, fontSize: 16, fontWeight: '600', marginTop: 4 },
-  productFoot: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 },
-  productPrice: { color: COLORS.muted, fontSize: 13 },
-  arrow: { color: COLORS.petrol, fontSize: 18 },
-  serviceBanner: { margin: 20, marginTop: 36, backgroundColor: COLORS.petrol, padding: 24, flexDirection: 'row', gap: 18 },
-  serviceNumber: { color: COLORS.gold, fontSize: 12, letterSpacing: 2 },
-  serviceCopy: { flex: 1 },
-  serviceTitle: { color: COLORS.ivory, fontSize: 21, lineHeight: 28, marginBottom: 10 },
-  serviceText: { color: '#C5D0CE', fontSize: 13, lineHeight: 21 },
-  searchBox: { height: 52, flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.ivory, borderWidth: 1, borderColor: COLORS.line, paddingHorizontal: 15, marginBottom: 15 },
-  searchIcon: { fontSize: 23, color: COLORS.petrol, marginRight: 10 },
-  searchInput: { flex: 1, color: COLORS.ink, fontSize: 15 },
-  filters: { gap: 8, paddingBottom: 20 },
-  filter: { paddingVertical: 10, paddingHorizontal: 17, borderWidth: 1, borderColor: COLORS.line, backgroundColor: COLORS.white },
-  filterActive: { backgroundColor: COLORS.petrol, borderColor: COLORS.petrol },
-  filterText: { color: COLORS.muted, fontSize: 12, fontWeight: '600' },
-  filterTextActive: { color: COLORS.ivory },
-  results: { color: COLORS.muted, fontSize: 9, letterSpacing: 2, marginBottom: 13 },
-  emptyState: { width: '100%', alignItems: 'center', paddingVertical: 64, paddingHorizontal: 30, backgroundColor: COLORS.ivory },
-  emptyIcon: { color: COLORS.goldDark, fontSize: 38, marginBottom: 10 },
-  emptyTitle: { color: COLORS.ink, fontSize: 20, fontWeight: '600' },
-  emptyText: { color: COLORS.muted, fontSize: 13, lineHeight: 20, textAlign: 'center', marginTop: 8 },
-  pageLead: { color: COLORS.muted, fontSize: 14, lineHeight: 22, marginTop: -8, marginBottom: 22 },
-  appointmentCard: { backgroundColor: COLORS.ivory, borderWidth: 1, borderColor: COLORS.line, padding: 18 },
-  monthRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 },
-  month: { color: COLORS.ink, fontSize: 13, letterSpacing: 2, fontWeight: '700' },
-  monthArrow: { color: COLORS.goldDark, fontSize: 26 },
-  daysRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 25 },
-  day: { width: 39, height: 62, alignItems: 'center', justifyContent: 'center', gap: 7 },
-  dayActive: { backgroundColor: COLORS.petrol },
-  dayName: { color: COLORS.muted, fontSize: 9, fontWeight: '700' },
-  dayNumber: { color: COLORS.ink, fontSize: 15, fontWeight: '600' },
-  dayTextActive: { color: COLORS.ivory },
-  fieldLabel: { color: COLORS.goldDark, fontSize: 9, letterSpacing: 2, fontWeight: '700', marginBottom: 12 },
-  timeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
-  time: { width: '30.8%', paddingVertical: 12, alignItems: 'center', borderWidth: 1, borderColor: COLORS.line, backgroundColor: COLORS.white },
-  timeActive: { backgroundColor: COLORS.gold, borderColor: COLORS.gold },
-  timeText: { color: COLORS.ink, fontSize: 12, fontWeight: '600' },
-  timeTextActive: { color: COLORS.deep },
-  confirmButton: { backgroundColor: COLORS.petrol, paddingVertical: 17, alignItems: 'center' },
-  confirmButtonText: { color: COLORS.ivory, fontSize: 10, fontWeight: '700', letterSpacing: 1.5 },
-  infoCard: { marginTop: 14, padding: 17, borderWidth: 1, borderColor: COLORS.line, flexDirection: 'row', alignItems: 'center', gap: 13 },
-  infoIcon: { color: COLORS.goldDark, fontSize: 25 },
-  infoTitle: { color: COLORS.ink, fontSize: 14, fontWeight: '600' },
-  infoText: { color: COLORS.muted, fontSize: 11, lineHeight: 17, marginTop: 4 },
-  profileHero: { backgroundColor: COLORS.deep, padding: 28, alignItems: 'center', marginBottom: 16 },
-  profileMark: { width: 70, height: 70, borderRadius: 35, borderWidth: 1, borderColor: COLORS.gold, alignItems: 'center', justifyContent: 'center', marginBottom: 18 },
-  profileMarkText: { color: COLORS.gold, fontSize: 31, fontWeight: '300' },
-  profileTitle: { color: COLORS.ivory, fontSize: 22, textAlign: 'center' },
-  profileText: { color: '#BFCBC9', textAlign: 'center', fontSize: 13, lineHeight: 20, marginTop: 10, marginBottom: 20 },
-  primaryWide: { width: '100%', backgroundColor: COLORS.gold, paddingVertical: 15, alignItems: 'center' },
-  primaryWideText: { color: COLORS.deep, fontSize: 10, fontWeight: '700', letterSpacing: 1.5 },
-  menuRow: { minHeight: 62, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: COLORS.line, flexDirection: 'row', alignItems: 'center' },
-  menuIcon: { width: 38, color: COLORS.goldDark, fontSize: 18 },
-  menuLabel: { flex: 1, color: COLORS.ink, fontSize: 14, fontWeight: '500' },
-  menuArrow: { color: COLORS.sage, fontSize: 23 },
-  tabBar: { height: Platform.OS === 'ios' ? 86 : 72, paddingBottom: Platform.OS === 'ios' ? 16 : 5, flexDirection: 'row', backgroundColor: COLORS.white, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: COLORS.line, paddingHorizontal: 5 },
-  tab: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 3 },
-  tabIcon: { color: COLORS.sage, fontSize: 20, lineHeight: 22 },
-  tabLabel: { color: COLORS.sage, fontSize: 9, fontWeight: '600' },
-  tabActive: { color: COLORS.petrol },
-  tabDot: { position: 'absolute', bottom: 2, width: 14, height: 2, backgroundColor: COLORS.gold },
-  modalBackdrop: { flex: 1, backgroundColor: 'rgba(7,29,34,.76)', alignItems: 'center', justifyContent: 'center', padding: 24 },
-  modalCard: { width: '100%', maxWidth: 380, backgroundColor: COLORS.white, padding: 28, alignItems: 'center' },
-  successMark: { width: 60, height: 60, borderRadius: 30, backgroundColor: COLORS.petrol, alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
-  successMarkText: { color: COLORS.gold, fontSize: 28 },
-  modalEyebrow: { color: COLORS.goldDark, fontSize: 9, letterSpacing: 2, fontWeight: '700' },
-  modalTitle: { color: COLORS.ink, fontSize: 26, marginTop: 8 },
-  modalText: { color: COLORS.muted, fontSize: 14, lineHeight: 22, textAlign: 'center', marginVertical: 16 },
+const s=StyleSheet.create({
+  safe:{flex:1,backgroundColor:C.bg},content:{flex:1},page:{paddingHorizontal:18,paddingBottom:120},pressed:{opacity:.76,transform:[{scale:.985}]},light:{color:C.white},
+  logo:{fontSize:20,fontWeight:'900',letterSpacing:6,color:C.ink},logoSub:{fontSize:6,fontWeight:'800',letterSpacing:2,color:C.gold,marginTop:4},logoSubLight:{color:'#E7CE96'},header:{height:76,flexDirection:'row',alignItems:'center'},headerTitle:{position:'absolute',left:0,right:0,textAlign:'center',fontSize:12,fontWeight:'700',color:C.ink},headerButtons:{marginLeft:'auto',flexDirection:'row',gap:8},headerButton:{width:40,height:40,borderRadius:20,backgroundColor:C.paper,borderWidth:1,borderColor:C.line,alignItems:'center',justifyContent:'center'},headerButtonText:{fontSize:19,color:C.ink},headerAvatar:{width:40,height:40,borderRadius:20,backgroundColor:C.petrol,alignItems:'center',justifyContent:'center'},headerAvatarText:{color:C.white,fontSize:13,fontWeight:'800'},
+  hero:{height:540,borderRadius:30,overflow:'hidden',padding:20,justifyContent:'space-between'},heroImage:{borderRadius:30},heroShade:{...StyleSheet.absoluteFill,backgroundColor:'rgba(3,12,13,.4)'},heroMeta:{flexDirection:'row',justifyContent:'space-between'},heroMetaText:{fontSize:7,color:C.white,fontWeight:'900',letterSpacing:1.4},heroKicker:{fontSize:8,color:'#E7CE96',fontWeight:'900',letterSpacing:2},heroTitle:{fontSize:47,lineHeight:48,color:C.white,fontWeight:'500',letterSpacing:-2,marginTop:12},heroCopy:{fontSize:12,lineHeight:18,color:'rgba(255,255,255,.82)',maxWidth:285,marginTop:13},heroActions:{flexDirection:'row',alignItems:'center',gap:10,marginTop:20},heroButton:{height:51,borderRadius:26,backgroundColor:C.ink,flexDirection:'row',alignItems:'center',paddingLeft:18,paddingRight:7,gap:18},heroButtonText:{fontSize:8,color:C.white,fontWeight:'900',letterSpacing:1.1},heroArrow:{width:37,height:37,borderRadius:19,backgroundColor:C.white,textAlign:'center',textAlignVertical:'center',fontSize:18,color:C.ink},arHero:{height:50,borderRadius:25,borderWidth:1,borderColor:'rgba(255,255,255,.5)',paddingHorizontal:14,alignItems:'center',justifyContent:'center',backgroundColor:'rgba(7,19,21,.28)'},arHeroText:{color:C.white,fontSize:7,fontWeight:'900',letterSpacing:.8},
+  sectionHead:{flexDirection:'row',alignItems:'flex-end',justifyContent:'space-between',marginTop:34,marginBottom:17},eyebrow:{fontSize:7,color:C.gold,fontWeight:'900',letterSpacing:2},sectionTitle:{fontSize:29,color:C.ink,fontWeight:'600',letterSpacing:-.8,marginTop:6},sectionLink:{fontSize:10,color:C.petrol,fontWeight:'700'},sectionCount:{fontSize:7,color:C.muted,fontWeight:'900',letterSpacing:1.2},row:{gap:12,paddingRight:18},itemCard:{width:(W-48)/2,marginBottom:24},rowItem:{width:190},itemVisual:{height:205,borderRadius:17,overflow:'hidden',alignItems:'center',justifyContent:'center'},itemHalo:{position:'absolute',width:155,height:155,borderRadius:78,backgroundColor:'rgba(255,255,255,.27)'},itemImage:{width:'96%',height:'77%',resizeMode:'contain'},heart:{position:'absolute',right:9,top:9,width:35,height:35,borderRadius:18,backgroundColor:'rgba(255,252,246,.9)',alignItems:'center',justifyContent:'center'},heartText:{fontSize:20,color:C.ink},heartOn:{color:C.red},arBadge:{position:'absolute',left:9,bottom:9,height:23,borderRadius:12,backgroundColor:C.petrol,paddingHorizontal:9,alignItems:'center',justifyContent:'center'},arBadgeText:{fontSize:7,color:C.white,fontWeight:'900',letterSpacing:1},itemLabel:{fontSize:7,color:C.gold,fontWeight:'900',letterSpacing:1.5,marginTop:10},itemName:{fontSize:15,color:C.ink,fontWeight:'600',marginTop:4},
+  darkFeature:{height:300,borderRadius:27,backgroundColor:C.petrol,marginTop:20,overflow:'hidden',flexDirection:'row'},featureText:{width:'58%',padding:22,zIndex:2},featureKicker:{fontSize:7,color:'#E7CE96',fontWeight:'900',letterSpacing:1.5},featureTitle:{fontSize:30,lineHeight:32,color:C.white,fontWeight:'500',marginTop:12},featureCopy:{fontSize:10,lineHeight:16,color:'#B9CFCC',marginTop:12},featureLink:{fontSize:8,color:C.white,fontWeight:'900',letterSpacing:1,marginTop:20},featureImage:{position:'absolute',right:-35,bottom:-12,width:235,height:260,resizeMode:'contain',transform:[{rotate:'-7deg'}]},storyRow:{gap:10,paddingRight:18},story:{width:205,height:300,borderRadius:22,overflow:'hidden',backgroundColor:C.petrol},storyImage:{width:'100%',height:'100%',resizeMode:'cover'},storyShade:{...StyleSheet.absoluteFill,backgroundColor:'rgba(3,12,13,.2)'},storyNumber:{position:'absolute',top:14,left:14,color:C.white,fontSize:8,fontWeight:'900'},storyTitle:{position:'absolute',bottom:16,left:14,color:C.white,fontSize:14,fontWeight:'700'},transition:{marginTop:28,backgroundColor:C.paper,borderRadius:24,borderWidth:1,borderColor:C.line,overflow:'hidden',flexDirection:'row',alignItems:'center',padding:12},transitionImage:{width:125,height:110,borderRadius:17,resizeMode:'cover'},transitionCopy:{flex:1,paddingHorizontal:14},transitionKicker:{fontSize:7,color:C.gold,fontWeight:'900',letterSpacing:1.4},transitionTitle:{fontSize:15,color:C.ink,fontWeight:'700',marginTop:6},transitionText:{fontSize:9,lineHeight:14,color:C.muted,marginTop:6},
+  screenTitle:{fontSize:43,lineHeight:45,color:C.ink,fontWeight:'500',letterSpacing:-1.7,marginTop:18},intro:{fontSize:12,lineHeight:19,color:C.muted,marginTop:13},searchBox:{height:58,borderRadius:29,backgroundColor:C.paper,borderWidth:1,borderColor:C.line,marginTop:24,flexDirection:'row',alignItems:'center',paddingHorizontal:18},searchIcon:{fontSize:20,color:C.ink},searchPlaceholder:{flex:1,fontSize:12,color:C.muted,marginLeft:12},searchTune:{fontSize:19,color:C.petrol},categories:{gap:8,paddingVertical:18},category:{height:38,borderRadius:19,paddingHorizontal:18,borderWidth:1,borderColor:C.line,justifyContent:'center',backgroundColor:C.paper},categoryOn:{backgroundColor:C.ink,borderColor:C.ink},categoryText:{fontSize:10,color:C.muted,fontWeight:'700'},categoryTextOn:{color:C.white},resultHead:{flexDirection:'row',justifyContent:'space-between',marginBottom:17},resultCount:{fontSize:7,color:C.muted,fontWeight:'900',letterSpacing:1.5},resultSort:{fontSize:9,color:C.ink},grid:{flexDirection:'row',flexWrap:'wrap',justifyContent:'space-between'},empty:{alignItems:'center',paddingTop:90},emptyIcon:{fontSize:56,color:C.gold},emptyTitle:{fontSize:21,color:C.ink,fontWeight:'600',marginTop:18},emptyCopy:{fontSize:12,lineHeight:18,color:C.muted,textAlign:'center',maxWidth:270,marginTop:9},petrolButton:{height:50,borderRadius:25,backgroundColor:C.petrol,paddingHorizontal:32,alignItems:'center',justifyContent:'center',marginTop:24},petrolButtonText:{fontSize:9,color:C.white,fontWeight:'900',letterSpacing:1.3},
+  bookingIntro:{backgroundColor:C.petrol,borderRadius:26,padding:22,marginTop:12},bookingKicker:{fontSize:7,color:'#E7CE96',fontWeight:'900',letterSpacing:1.8},bookingTitle:{fontSize:31,lineHeight:33,color:C.white,fontWeight:'500',marginTop:10},bookingCopy:{fontSize:10,lineHeight:16,color:'#B9CFCC',marginTop:10},bookingCard:{backgroundColor:C.paper,borderRadius:28,borderWidth:1,borderColor:C.line,padding:20,marginTop:14},bookingTop:{flexDirection:'row',justifyContent:'space-between'},bookingMonth:{fontSize:9,color:C.ink,fontWeight:'900',letterSpacing:1.4},bookingArrows:{fontSize:18,color:C.petrol},days:{flexDirection:'row',gap:8,marginTop:20},day:{flex:1,height:74,borderRadius:18,borderWidth:1,borderColor:C.line,alignItems:'center',justifyContent:'center'},dayOn:{backgroundColor:C.petrol,borderColor:C.petrol},dayName:{fontSize:7,color:C.muted,fontWeight:'800'},dayNum:{fontSize:20,color:C.ink,fontWeight:'600',marginTop:7},dayTextOn:{color:C.white},timeKicker:{fontSize:7,color:C.gold,fontWeight:'900',letterSpacing:1.4,marginTop:25,marginBottom:12},times:{flexDirection:'row',flexWrap:'wrap',gap:8},time:{width:'31%',height:43,borderRadius:14,borderWidth:1,borderColor:C.line,alignItems:'center',justifyContent:'center'},timeOn:{backgroundColor:'#D2E0DD',borderColor:C.petrol},timeText:{fontSize:10,color:C.muted},timeTextOn:{color:C.petrol,fontWeight:'900'},bookButton:{height:56,borderRadius:17,backgroundColor:C.ink,flexDirection:'row',alignItems:'center',justifyContent:'space-between',paddingHorizontal:17,marginTop:21},bookButtonText:{fontSize:8,color:C.white,fontWeight:'900'},bookButtonArrow:{fontSize:20,color:C.white},store:{height:78,borderRadius:20,backgroundColor:C.petrol,marginTop:14,padding:12,flexDirection:'row',alignItems:'center',gap:12},storeLogo:{width:52,height:52,borderRadius:17,backgroundColor:C.paper,alignItems:'center',justifyContent:'center'},storeLogoText:{fontSize:20,color:C.petrol,fontWeight:'900'},storeName:{fontSize:13,color:C.white,fontWeight:'700'},storeAddress:{fontSize:8,color:'#B9CFCC',marginTop:5},storeArrow:{fontSize:20,color:C.white},
+  profile:{alignItems:'center',paddingVertical:38},profileAvatar:{width:86,height:86,borderRadius:43,backgroundColor:C.petrol,alignItems:'center',justifyContent:'center'},profileAvatarText:{fontSize:29,color:C.white,fontWeight:'700'},profileTitle:{fontSize:23,color:C.ink,fontWeight:'600',marginTop:19},profileCopy:{fontSize:11,color:C.muted,marginTop:7},menu:{height:74,borderRadius:19,backgroundColor:C.paper,borderWidth:1,borderColor:C.line,flexDirection:'row',alignItems:'center',paddingHorizontal:15,marginBottom:9},menuIcon:{width:39,fontSize:21,color:C.petrol},menuTitle:{fontSize:12,color:C.ink,fontWeight:'700'},menuCopy:{fontSize:8,color:C.muted,marginTop:4},menuArrow:{fontSize:25,color:C.muted},version:{fontSize:7,color:C.gold,fontWeight:'900',letterSpacing:2,textAlign:'center',marginTop:28},
+  navShell:{position:'absolute',left:10,right:10,bottom:8,shadowColor:'#000',shadowOpacity:.18,shadowRadius:18,shadowOffset:{width:0,height:7},elevation:10},nav:{height:78,borderRadius:27,backgroundColor:C.petrol,borderWidth:1,borderColor:'#1E4D50',flexDirection:'row',paddingHorizontal:4},navItem:{flex:1,alignItems:'center',justifyContent:'center'},navIcon:{height:27,fontSize:19,color:'#78908F'},navIconOn:{color:'#E7CE96'},navLabel:{fontSize:6.5,color:'#78908F'},navLabelOn:{color:C.white,fontWeight:'900'},navDot:{width:4,height:4,borderRadius:2,backgroundColor:'#E7CE96',marginTop:4},
+  modalShade:{flex:1,backgroundColor:'rgba(7,19,21,.58)',justifyContent:'flex-end'},sheet:{backgroundColor:C.bg,borderTopLeftRadius:34,borderTopRightRadius:34,padding:19,paddingBottom:30},handle:{width:40,height:4,borderRadius:2,backgroundColor:'#B7B5AE',alignSelf:'center',marginBottom:15},close:{position:'absolute',right:21,top:17,width:35,height:35,borderRadius:18,backgroundColor:'rgba(255,255,255,.85)',zIndex:2,alignItems:'center',justifyContent:'center'},closeText:{fontSize:23,color:C.ink},sheetVisual:{height:255,borderRadius:22,alignItems:'center',justifyContent:'center',overflow:'hidden'},sheetHalo:{position:'absolute',width:215,height:215,borderRadius:108,backgroundColor:'rgba(255,255,255,.25)'},sheetImage:{width:'91%',height:'83%',resizeMode:'contain'},sheetLabel:{fontSize:7,color:C.gold,fontWeight:'900',letterSpacing:1.7,marginTop:18},sheetName:{fontSize:31,color:C.ink,fontWeight:'600',letterSpacing:-1,marginTop:5},sheetCategory:{fontSize:10,color:C.muted,marginTop:5},sheetCopy:{fontSize:11,lineHeight:18,color:C.muted,marginTop:13},sheetActions:{flexDirection:'row',gap:9,marginTop:19},tryButton:{height:52,borderRadius:17,backgroundColor:C.petrol,flex:1,alignItems:'center',justifyContent:'center'},tryButtonText:{fontSize:8,color:C.white,fontWeight:'900',letterSpacing:.7},saveButton:{height:52,borderRadius:17,borderWidth:1,borderColor:C.line,paddingHorizontal:18,alignItems:'center',justifyContent:'center',backgroundColor:C.paper},saveButtonText:{fontSize:9,color:C.red,fontWeight:'900'},
+  searchPage:{flex:1,backgroundColor:C.bg},searchTop:{height:78,flexDirection:'row',alignItems:'center',gap:12,paddingHorizontal:20},searchBack:{fontSize:37,color:C.ink},searchInput:{flex:1,fontSize:23,color:C.ink,borderBottomWidth:1,borderColor:C.ink,paddingVertical:8},searchClear:{fontSize:27,color:C.muted},searchResults:{padding:20,paddingBottom:60},searchTip:{fontSize:7,color:C.gold,fontWeight:'900',letterSpacing:1.5,marginBottom:26},suggestion:{fontSize:23,color:C.ink,fontWeight:'500',paddingVertical:14,borderBottomWidth:1,borderColor:C.line},confirmShade:{flex:1,backgroundColor:'rgba(7,19,21,.65)',alignItems:'center',justifyContent:'center',padding:24},confirmCard:{width:'100%',backgroundColor:C.paper,borderRadius:30,padding:30,alignItems:'center'},confirmIcon:{width:72,height:72,borderRadius:36,backgroundColor:'#CBE3D8',alignItems:'center',justifyContent:'center'},confirmIconText:{fontSize:31,color:C.petrol,fontWeight:'900'},confirmKicker:{fontSize:8,color:C.gold,fontWeight:'900',letterSpacing:2,marginTop:24},confirmTitle:{fontSize:27,color:C.ink,fontWeight:'600',marginTop:8},confirmCopy:{fontSize:12,lineHeight:19,color:C.muted,textAlign:'center',marginTop:11},
 });
