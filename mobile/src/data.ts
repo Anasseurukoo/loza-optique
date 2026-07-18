@@ -8,6 +8,7 @@ export type CatalogueItem = {
   label: string;
   category: Exclude<Category, 'Tout'>;
   image: ImageSourcePropType;
+  arImage?: ImageSourcePropType;
   color: string;
   tryOn?: boolean;
 };
