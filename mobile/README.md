@@ -2,7 +2,7 @@
 
 Application mobile Android/iOS de Loza Optique, construite avec Expo, React Native et TypeScript.
 
-## Version 0.0.2
+## Version 0.0.3
 
 - Accueil premium fidèle à l'identité Loza.
 - Catalogue filtrable et recherche de montures.
@@ -11,6 +11,9 @@ Application mobile Android/iOS de Loza Optique, construite avec Expo, React Nati
 - Parcours de prise de rendez-vous.
 - Virtual Mirror AR avec caméra frontale, détection ML Kit des repères du visage et suivi temps réel des montures.
 - Traitement AR local sur le téléphone : aucune image n'est envoyée vers un serveur.
+- Correction de l'orientation AR avec normalisation de l'angle du visage et masquage des reflets des visuels catalogue.
+- Ajout d'une ordonnance PDF ou image depuis le Profil et le parcours de rendez-vous.
+- Lisibilité renforcée et interface éditoriale épurée des symboles de lien externes.
 - Espace client préparé pour une future authentification.
 - Navigation mobile complète et responsive.
 
@@ -21,7 +24,7 @@ npm install
 npx expo start --dev-client
 ```
 
-Le Virtual Mirror utilise des modules natifs qui ne sont pas inclus dans Expo Go. La version 0.0.2 doit donc être lancée avec un development build.
+Le Virtual Mirror utilise des modules natifs qui ne sont pas inclus dans Expo Go. La version 0.0.3 doit donc être lancée avec un development build.
 
 ## Générer les APK Android
 

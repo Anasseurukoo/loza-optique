@@ -2,7 +2,7 @@
   "expo": {
     "name": "Loza Optique",
     "slug": "loza-optique-mobile",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "lozaoptique",
