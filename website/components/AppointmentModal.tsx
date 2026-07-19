@@ -1,7 +1,7 @@
 "use client";
 
-import { CalendarDays, CheckCircle2, Clock, X } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { CalendarDays, Clock, Mail, X } from "lucide-react";
+import { FormEvent, useMemo, useState } from "react";
 
 type AppointmentModalProps = {
   open: boolean;
@@ -12,7 +12,6 @@ function getToday(): string {
   const today = new Date();
   const offset = today.getTimezoneOffset();
   const localDate = new Date(today.getTime() - offset * 60 * 1000);
-
   return localDate.toISOString().split("T")[0];
 }
 
@@ -35,24 +34,51 @@ export default function AppointmentModal({
   const [selectedTime, setSelectedTime] = useState("");
   const [name, setName] = useState("");
   const [telephone, setTelephone] = useState("");
-  const [submitted, setSubmitted] = useState(false);
 
-  if (!open) {
-    return null;
-  }
+  const selectedDayIsFriday = useMemo(() => {
+    if (!selectedDate) return false;
+    const date = new Date(`${selectedDate}T12:00:00`);
+    return date.getDay() === 5;
+  }, [selectedDate]);
+
+  if (!open) return null;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!selectedDate || !selectedTime || !name || !telephone) {
+    if (
+      !selectedDate ||
+      !selectedTime ||
+      !name.trim() ||
+      !telephone.trim() ||
+      selectedDayIsFriday
+    ) {
       return;
     }
 
-    setSubmitted(true);
+    const subject = encodeURIComponent(
+      "Demande de rendez-vous — Loza Optique",
+    );
+
+    const body = encodeURIComponent(
+      [
+        `Nom : ${name.trim()}`,
+        `Téléphone : ${telephone.trim()}`,
+        `Date souhaitée : ${selectedDate}`,
+        `Heure souhaitée : ${selectedTime}`,
+        "",
+        "Cette demande doit être confirmée par téléphone par Loza Optique.",
+      ].join("\n"),
+    );
+
+    window.location.href = `mailto:lozaoptique@gmail.com?subject=${subject}&body=${body}`;
   };
 
   const handleClose = () => {
-    setSubmitted(false);
+    setSelectedDate("");
+    setSelectedTime("");
+    setName("");
+    setTelephone("");
     onClose();
   };
 
@@ -61,7 +87,7 @@ export default function AppointmentModal({
       className="fixed inset-0 z-[100] flex items-center justify-center bg-[#071d22]/70 px-4 py-8 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
-      aria-label="Prendre rendez-vous"
+      aria-labelledby="appointment-title"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) {
           handleClose();
@@ -78,169 +104,137 @@ export default function AppointmentModal({
           <X size={20} />
         </button>
 
-        {submitted ? (
-          <div className="py-12 text-center">
-            <CheckCircle2
-              size={54}
-              className="mx-auto text-[#a27d38]"
+        <div className="pr-12">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#a27d38]">
+            Loza Optique
+          </p>
+
+          <h2
+            id="appointment-title"
+            className="mt-4 text-3xl font-semibold sm:text-4xl"
+          >
+            Préparer une demande
+          </h2>
+
+          <p className="mt-3 leading-7 text-[#526b6c]">
+            Choisissez un jour et une heure. Votre application email s’ouvrira
+            avec la demande préparée. Le rendez-vous reste soumis à confirmation
+            par téléphone.
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+          <div>
+            <label
+              htmlFor="appointment-name"
+              className="mb-2 block text-sm font-semibold"
+            >
+              Nom complet
+            </label>
+            <input
+              id="appointment-name"
+              type="text"
+              required
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              placeholder="Votre nom"
+              autoComplete="name"
+              className="w-full rounded-2xl border border-[#103943]/15 bg-white px-4 py-4 outline-none transition focus:border-[#a27d38]"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="appointment-phone"
+              className="mb-2 block text-sm font-semibold"
+            >
+              Téléphone
+            </label>
+            <input
+              id="appointment-phone"
+              type="tel"
+              required
+              value={telephone}
+              onChange={(event) => setTelephone(event.target.value)}
+              placeholder="+212..."
+              autoComplete="tel"
+              className="w-full rounded-2xl border border-[#103943]/15 bg-white px-4 py-4 outline-none transition focus:border-[#a27d38]"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="appointment-date"
+              className="mb-2 flex items-center gap-2 text-sm font-semibold"
+            >
+              <CalendarDays size={17} />
+              Choisir le jour
+            </label>
+            <input
+              id="appointment-date"
+              type="date"
+              required
+              min={getToday()}
+              value={selectedDate}
+              onChange={(event) => {
+                setSelectedDate(event.target.value);
+                setSelectedTime("");
+              }}
+              className="w-full rounded-2xl border border-[#103943]/15 bg-white px-4 py-4 outline-none transition focus:border-[#a27d38]"
             />
 
-            <h2 className="mt-6 text-3xl font-semibold">
-              Demande enregistrée
-            </h2>
+            {selectedDayIsFriday && (
+              <p className="mt-2 text-sm font-medium text-red-700">
+                La boutique est fermée le vendredi. Choisissez un autre jour.
+              </p>
+            )}
+          </div>
 
-            <p className="mx-auto mt-4 max-w-md leading-7 text-[#526b6c]">
-              Votre demande pour le{" "}
-              <strong>{selectedDate}</strong> à{" "}
-              <strong>{selectedTime}</strong> a bien été préparée.
-              LOZA Optique vous contactera pour confirmer le rendez-vous.
+          <div>
+            <p className="mb-3 flex items-center gap-2 text-sm font-semibold">
+              <Clock size={17} />
+              Choisir l’heure
             </p>
 
-            <a
-              href={`mailto:lozaoptique@gmail.com?subject=Demande de rendez-vous LOZA Optique&body=Nom : ${encodeURIComponent(
-                name,
-              )}%0ATéléphone : ${encodeURIComponent(
-                telephone,
-              )}%0ADate : ${encodeURIComponent(
-                selectedDate,
-              )}%0AHeure : ${encodeURIComponent(selectedTime)}`}
-              className="mt-8 inline-flex rounded-full bg-[#103943] px-7 py-4 text-sm font-semibold text-white transition hover:bg-[#071d22]"
-            >
-              Envoyer la demande par email
-            </a>
-
-            <button
-              type="button"
-              onClick={handleClose}
-              className="mt-4 block w-full text-sm font-medium text-[#526b6c] transition hover:text-[#103943]"
-            >
-              Fermer
-            </button>
-          </div>
-        ) : (
-          <>
-            <div className="pr-12">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#a27d38]">
-                LOZA Optique
-              </p>
-
-              <h2 className="mt-4 text-3xl font-semibold sm:text-4xl">
-                Choisir un rendez-vous
-              </h2>
-
-              <p className="mt-3 leading-7 text-[#526b6c]">
-                Sélectionnez le jour et l’heure souhaités. Le rendez-vous
-                sera confirmé par téléphone.
-              </p>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {availableTimes.map((time) => (
+                <button
+                  key={time}
+                  type="button"
+                  disabled={!selectedDate || selectedDayIsFriday}
+                  onClick={() => setSelectedTime(time)}
+                  className={`rounded-xl border px-4 py-3 text-sm font-semibold transition ${
+                    selectedTime === time
+                      ? "border-[#103943] bg-[#103943] text-white"
+                      : "border-[#103943]/15 bg-white hover:border-[#a27d38]"
+                  } disabled:cursor-not-allowed disabled:opacity-40`}
+                >
+                  {time}
+                </button>
+              ))}
             </div>
+          </div>
 
-            <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-              <div>
-                <label
-                  htmlFor="appointment-name"
-                  className="mb-2 block text-sm font-semibold"
-                >
-                  Nom complet
-                </label>
+          <button
+            type="submit"
+            disabled={
+              !selectedDate ||
+              !selectedTime ||
+              !name.trim() ||
+              !telephone.trim() ||
+              selectedDayIsFriday
+            }
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-[#103943] px-7 py-4 text-sm font-semibold text-white transition hover:bg-[#071d22] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <Mail size={17} />
+            Préparer l’email
+          </button>
 
-                <input
-                  id="appointment-name"
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  placeholder="Votre nom"
-                  className="w-full rounded-2xl border border-[#103943]/15 bg-white px-4 py-4 outline-none transition focus:border-[#a27d38]"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="appointment-phone"
-                  className="mb-2 block text-sm font-semibold"
-                >
-                  Téléphone
-                </label>
-
-                <input
-                  id="appointment-phone"
-                  type="tel"
-                  required
-                  value={telephone}
-                  onChange={(event) => setTelephone(event.target.value)}
-                  placeholder="+212..."
-                  className="w-full rounded-2xl border border-[#103943]/15 bg-white px-4 py-4 outline-none transition focus:border-[#a27d38]"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="appointment-date"
-                  className="mb-2 flex items-center gap-2 text-sm font-semibold"
-                >
-                  <CalendarDays size={17} />
-                  Choisir le jour
-                </label>
-
-                <input
-                  id="appointment-date"
-                  type="date"
-                  required
-                  min={getToday()}
-                  value={selectedDate}
-                  onChange={(event) => {
-                    setSelectedDate(event.target.value);
-                    setSelectedTime("");
-                  }}
-                  className="w-full rounded-2xl border border-[#103943]/15 bg-white px-4 py-4 outline-none transition focus:border-[#a27d38]"
-                />
-              </div>
-
-              <div>
-                <p className="mb-3 flex items-center gap-2 text-sm font-semibold">
-                  <Clock size={17} />
-                  Choisir l’heure
-                </p>
-
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  {availableTimes.map((time) => (
-                    <button
-                      key={time}
-                      type="button"
-                      disabled={!selectedDate}
-                      onClick={() => setSelectedTime(time)}
-                      className={`rounded-xl border px-4 py-3 text-sm font-semibold transition ${
-                        selectedTime === time
-                          ? "border-[#103943] bg-[#103943] text-white"
-                          : "border-[#103943]/15 bg-white hover:border-[#a27d38]"
-                      } disabled:cursor-not-allowed disabled:opacity-40`}
-                    >
-                      {time}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={
-                  !selectedDate ||
-                  !selectedTime ||
-                  !name.trim() ||
-                  !telephone.trim()
-                }
-                className="w-full rounded-full bg-[#103943] px-7 py-4 text-sm font-semibold text-white transition hover:bg-[#071d22] disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                Confirmer la demande
-              </button>
-
-              <p className="text-center text-xs leading-5 text-[#6c7d7b]">
-                Aucun rendez-vous n’est définitif avant confirmation par
-                LOZA Optique au +212 522 82 12 83.
-              </p>
-            </form>
-          </>
-        )}
+          <p className="text-center text-xs leading-5 text-[#6c7d7b]">
+            Aucun rendez-vous n’est confirmé avant l’appel de Loza Optique au
+            +212 522 82 12 83.
+          </p>
+        </form>
       </div>
     </div>
   );

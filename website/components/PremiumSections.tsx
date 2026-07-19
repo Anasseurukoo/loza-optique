@@ -64,7 +64,6 @@ export function ServicesSection() {
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#a27d38]">
             Notre savoir-faire
           </p>
-
           <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] sm:text-6xl [font-family:Georgia,serif]">
             Des services pensés pour
             <span className="block font-normal italic text-[#a27d38]">
@@ -76,7 +75,6 @@ export function ServicesSection() {
         <div className="mt-14 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
           {services.map((service, index) => {
             const Icon = service.icon;
-
             return (
               <motion.article
                 key={service.title}
@@ -89,9 +87,7 @@ export function ServicesSection() {
                 <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#d6bd82]/20 text-[#a27d38]">
                   <Icon size={22} />
                 </span>
-
                 <h3 className="mt-6 text-xl font-semibold">{service.title}</h3>
-
                 <p className="mt-3 text-sm leading-7 text-[#526b6c]">
                   {service.description}
                 </p>
@@ -154,7 +150,6 @@ export function AppExperienceSection() {
             <span className="rounded-full bg-[#d6bd82] px-6 py-3 text-sm font-semibold text-[#071d22]">
               Bientôt sur Google Play
             </span>
-
             <span className="rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white/80">
               Version iPhone prochainement
             </span>
@@ -182,7 +177,6 @@ export function AppExperienceSection() {
                     <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#103943] text-white">
                       <Camera size={20} />
                     </span>
-
                     <div>
                       <p className="text-sm font-semibold">Essayage AR</p>
                       <p className="text-xs text-[#526b6c]">
@@ -201,9 +195,7 @@ export function AppExperienceSection() {
                 </div>
 
                 <div className="absolute inset-x-7 bottom-7 rounded-3xl bg-[#071d22] p-5 text-white">
-                  <p className="text-sm font-semibold">
-                    Voyez avant de choisir
-                  </p>
+                  <p className="text-sm font-semibold">Voyez avant de choisir</p>
                   <p className="mt-2 text-xs leading-5 text-white/65">
                     Une sélection de montures compatibles avec l’essayage
                     virtuel.
@@ -252,11 +244,9 @@ export function AboutSection() {
           <p className="text-xs uppercase tracking-[0.35em] text-[#d6bd82]">
             Notre histoire
           </p>
-
           <p className="mt-6 text-7xl font-semibold text-[#d6bd82] [font-family:Georgia,serif]">
             1998
           </p>
-
           <p className="mt-4 text-lg leading-8 text-white/75">
             Une expérience construite autour du conseil, de la précision et de
             la confiance.
@@ -271,11 +261,9 @@ export function AboutSection() {
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#a27d38]">
             Notre expertise, votre confiance
           </p>
-
           <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] sm:text-6xl [font-family:Georgia,serif]">
             Une maison d’optique proche de ses clients.
           </h2>
-
           <p className="mt-6 max-w-3xl text-base leading-8 text-[#526b6c] sm:text-lg">
             Loza Optique accompagne chaque client dans le choix de montures
             adaptées à son style, à son confort et à ses besoins. Notre réseau
@@ -286,16 +274,13 @@ export function AboutSection() {
           <div className="mt-9 grid gap-4 md:grid-cols-3">
             {pillars.map((pillar) => {
               const Icon = pillar.icon;
-
               return (
                 <div
                   key={pillar.title}
                   className="rounded-2xl border border-[#103943]/10 bg-white/70 p-5"
                 >
                   <Icon size={21} className="text-[#a27d38]" />
-
                   <h3 className="mt-4 font-semibold">{pillar.title}</h3>
-
                   <p className="mt-2 text-sm leading-6 text-[#526b6c]">
                     {pillar.text}
                   </p>
@@ -323,7 +308,6 @@ export function ContactSection() {
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#a27d38]">
               Nous trouver
             </p>
-
             <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] sm:text-6xl [font-family:Georgia,serif]">
               Passez nous voir à Casablanca.
             </h2>
@@ -360,7 +344,6 @@ export function ContactSection() {
                 <p className="mt-1 font-semibold">
                   132 Souk Korea, Bloc EF, Casablanca
                 </p>
-
                 <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#a27d38]">
                   Ouvrir dans Google Maps
                   <ArrowUpRight size={16} />
@@ -370,11 +353,7 @@ export function ContactSection() {
 
             <div className="mt-5 rounded-2xl border border-[#103943]/10 bg-[#ede6d9] p-6">
               <div className="flex items-start gap-4">
-                <Clock
-                  size={21}
-                  className="mt-1 shrink-0 text-[#a27d38]"
-                />
-
+                <Clock size={21} className="mt-1 shrink-0 text-[#a27d38]" />
                 <div>
                   <p className="font-semibold">Horaires</p>
                   <p className="mt-2 text-sm leading-6 text-[#526b6c]">
@@ -393,11 +372,9 @@ export function ContactSection() {
             <p className="text-xs uppercase tracking-[0.35em] text-[#d6bd82]">
               Prendre rendez-vous
             </p>
-
             <h2 className="mt-5 text-4xl font-semibold [font-family:Georgia,serif]">
               Un créneau dédié, une confirmation humaine.
             </h2>
-
             <p className="mt-5 text-base leading-8 text-white/70">
               Préparez votre demande en ligne. Loza Optique vous contactera
               ensuite pour confirmer le jour et le créneau.
@@ -416,7 +393,6 @@ export function ContactSection() {
                 <Phone size={17} />
                 +212 522 82 12 83
               </p>
-
               <p className="mt-3 flex items-center gap-3">
                 <Mail size={17} />
                 lozaoptique@gmail.com
@@ -442,7 +418,6 @@ export function HomeFooter() {
           <p className="text-xl tracking-[0.12em] text-[#d6bd82]">
             LOZA OPTIQUE
           </p>
-
           <p className="mt-2 text-sm text-white/55">
             Opticien à Casablanca depuis 1998.
           </p>
@@ -452,19 +427,15 @@ export function HomeFooter() {
           <Link href="/#top" className="hover:text-[#d6bd82]">
             Accueil
           </Link>
-
           <Link href="/#collections" className="hover:text-[#d6bd82]">
             Collections
           </Link>
-
           <Link href="/#services" className="hover:text-[#d6bd82]">
             Services
           </Link>
-
           <Link href="/#application" className="hover:text-[#d6bd82]">
             Application
           </Link>
-
           <Link href="/confidentialite/" className="hover:text-[#d6bd82]">
             Confidentialité
           </Link>
