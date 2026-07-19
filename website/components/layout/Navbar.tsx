@@ -10,11 +10,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import AppointmentModal from "./AppointmentModal";
+import AppointmentModal from "../appointment/AppointmentModal";
 
 const navLinks = [
   { name: "Accueil", href: "/#top" },
-  { name: "Marques", href: "/#brands" },
   { name: "Collections", href: "/#collections" },
   { name: "Services", href: "/#services" },
   { name: "Application", href: "/#application" },

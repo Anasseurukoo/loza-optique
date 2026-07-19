@@ -1,6 +1,7 @@
-import Collections from "../components/Collections";
-import Hero from "../components/Hero";
-import Navbar from "../components/Navbar";
+import Collections from "../components/collections/Collections";
+import Hero from "../components/hero/Hero";
+import Navbar from "../components/layout/Navbar";
+import BrandSection from "../components/brands/BrandSection";
 import {
   AboutSection,
   AppExperienceSection,
@@ -15,8 +16,9 @@ export default function Home() {
     <>
       <Navbar />
 
-      <main id="top" className="pb-20 md:pb-0">
+      <main>
         <Hero />
+        <BrandSection />
         <Collections />
         <ServicesSection />
         <AppExperienceSection />

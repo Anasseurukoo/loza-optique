@@ -11,8 +11,8 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import AppointmentModal from "./AppointmentModal";
-import { withBasePath } from "../lib/site";
+import AppointmentModal from "../appointment/AppointmentModal";
+import { withBasePath } from "../../lib/site";
 
 const trustItems = [
   {
