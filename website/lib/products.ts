@@ -1,4 +1,4 @@
-export type ProductCategory = "vue" | "soleil";
+﻿export type ProductCategory = "vue" | "soleil";
 export type Audience = "homme" | "femme";
 export type FaceCoverage = "Petite" | "Standard" | "Generous";
 export type BridgeFit = "High Bridge Fit" | "Adjustable Nosepads";
@@ -72,13 +72,18 @@ export const products: Product[] = [
     modelCode: "PO2496SZ",
     category: "soleil",
     audience: ["homme", "femme"],
-    images: ["/images/products/persol/po2496sz-front.webp"],
-    color: "Doré · Verres verts",
+    images: [
+      "/images/products/persol/po2496sz-front.webp",
+      "/images/products/persol-alpine-sun.webp",
+      "/images/lifestyle/persol-alpine-men.webp",
+      "/images/lifestyle/persol-alpine-women.webp",
+    ],
+    color: "DorÃ© Â· Verres verts",
     badge: "Signature",
     description:
-      "Une monture ronde en métal doré au caractère iconique, complétée par des verres verts et des détails textiles distinctifs.",
+      "Une monture ronde en mÃ©tal dorÃ© au caractÃ¨re iconique, complÃ©tÃ©e par des verres verts et des dÃ©tails textiles distinctifs.",
     features: [
-      "Monture métal",
+      "Monture mÃ©tal",
       "Verres en cristal",
       "Plaquettes ajustables",
       "Fabrication italienne",
@@ -111,13 +116,13 @@ export const products: Product[] = [
       "/images/products/persol/po3264s-front.webp",
       "/images/products/persol/po3264s-angle.webp",
     ],
-    color: "Noir / Or · Verres noirs polarisés",
-    badge: "Polarisé",
+    color: "Noir / Or Â· Verres noirs polarisÃ©s",
+    badge: "PolarisÃ©",
     description:
-      "Une monture ronde noire rehaussée d’un pont doré, pensée pour un style masculin précis et contemporain.",
+      "Une monture ronde noire rehaussÃ©e dâ€™un pont dorÃ©, pensÃ©e pour un style masculin prÃ©cis et contemporain.",
     features: [
-      "Acétate et métal",
-      "Verres noirs polarisés",
+      "AcÃ©tate et mÃ©tal",
+      "Verres noirs polarisÃ©s",
       "Plaquettes ajustables",
       "Fabrication italienne",
     ],
@@ -149,12 +154,12 @@ export const products: Product[] = [
       "/images/products/persol/po1019s-front.webp",
       "/images/products/persol/po1019s-angle.webp",
     ],
-    color: "Doré · Verres violets",
-    badge: "Élégance",
+    color: "DorÃ© Â· Verres violets",
+    badge: "Ã‰lÃ©gance",
     description:
-      "Une monture ronde dorée aux verres violets, légère et raffinée, avec des branches mêlant métal et acétate.",
+      "Une monture ronde dorÃ©e aux verres violets, lÃ©gÃ¨re et raffinÃ©e, avec des branches mÃªlant mÃ©tal et acÃ©tate.",
     features: [
-      "Métal et acétate",
+      "MÃ©tal et acÃ©tate",
       "Verres violets en cristal",
       "Plaquettes ajustables",
       "Fabrication italienne",
@@ -183,13 +188,16 @@ export const products: Product[] = [
     modelCode: "PO3393S",
     category: "soleil",
     audience: ["homme", "femme"],
-    images: ["/images/products/persol/po3393s-front.webp"],
-    color: "Havane · Verres verts",
+    images: [
+      "/images/products/persol/po3393s-front.webp",
+      "/images/products/persol-tortoise-sun.webp",
+    ],
+    color: "Havane Â· Verres verts",
     badge: "3D Ready",
     description:
-      "Une monture solaire havane généreuse, structurée par un double pont et associée à des verres verts en cristal.",
+      "Une monture solaire havane gÃ©nÃ©reuse, structurÃ©e par un double pont et associÃ©e Ã  des verres verts en cristal.",
     features: [
-      "Acétate havane",
+      "AcÃ©tate havane",
       "Verres verts en cristal",
       "High Bridge Fit",
       "Fabrication italienne",
@@ -212,20 +220,23 @@ export const products: Product[] = [
   {
     id: 5,
     slug: "ida-doree",
-    name: "Ida Dorée",
+    name: "Ida DorÃ©e",
     brand: "Persol",
     reference: "PO1018S",
     modelCode: "PO1018S",
     category: "soleil",
     audience: ["homme", "femme"],
-    images: ["/images/products/persol/po1018s-front.webp"],
-    color: "Doré · Verres verts polarisés",
-    badge: "Polarisé",
+    images: [
+      "/images/products/persol/po1018s-front.webp",
+      "/images/products/persol-gold-sun.webp",
+    ],
+    color: "DorÃ© Â· Verres verts polarisÃ©s",
+    badge: "PolarisÃ©",
     description:
-      "Une monture fine en métal doré, équilibrée par des verres verts polarisés et des branches en acétate.",
+      "Une monture fine en mÃ©tal dorÃ©, Ã©quilibrÃ©e par des verres verts polarisÃ©s et des branches en acÃ©tate.",
     features: [
-      "Métal et acétate",
-      "Verres verts polarisés",
+      "MÃ©tal et acÃ©tate",
+      "Verres verts polarisÃ©s",
       "Plaquettes ajustables",
       "Fabrication italienne",
     ],
@@ -253,12 +264,15 @@ export const products: Product[] = [
     modelCode: "PO3318V",
     category: "vue",
     audience: ["homme", "femme"],
-    images: ["/images/products/persol/po3318v-front.webp"],
-    color: "Cobalto · Verres optiques",
+    images: [
+      "/images/products/persol/po3318v-front.webp",
+      "/images/products/persol-blue-optical.webp",
+    ],
+    color: "Cobalto Â· Verres optiques",
     description:
-      "Une monture optique en acétate bleu cobalto, équilibrée et polyvalente pour un usage quotidien.",
+      "Une monture optique en acÃ©tate bleu cobalto, Ã©quilibrÃ©e et polyvalente pour un usage quotidien.",
     features: [
-      "Acétate cobalto",
+      "AcÃ©tate cobalto",
       "Monture optique",
       "High Bridge Fit",
       "Fabrication italienne",
@@ -266,7 +280,7 @@ export const products: Product[] = [
     frameColor: "Cobalto",
     frameMaterial: "Acetate",
     lensColor: "Clear",
-    lensMaterial: "Non précisé",
+    lensMaterial: "Non prÃ©cisÃ©",
     madeIn: "Italie",
     measurements: {
       lensWidth: 51,
@@ -281,19 +295,24 @@ export const products: Product[] = [
   {
     id: 7,
     slug: "noir-carre",
-    name: "Noir Carré",
+    name: "Noir CarrÃ©",
     brand: "Persol",
     reference: "PO3269S",
     modelCode: "PO3269S",
     category: "soleil",
     audience: ["homme", "femme"],
-    images: ["/images/products/persol/po3269s-front.webp"],
-    color: "Noir · Verres gris foncé",
+    images: [
+      "/images/products/persol/po3269s-front.webp",
+      "/images/products/persol-black-square.webp",
+      "/images/lifestyle/persol-men-black-square.webp",
+      "/images/lifestyle/persol-women-black-square.webp",
+    ],
+    color: "Noir Â· Verres gris foncÃ©",
     description:
-      "Une silhouette carrée noire, sobre et contemporaine, complétée par des verres gris foncé en cristal.",
+      "Une silhouette carrÃ©e noire, sobre et contemporaine, complÃ©tÃ©e par des verres gris foncÃ© en cristal.",
     features: [
-      "Acétate noir",
-      "Verres gris foncé",
+      "AcÃ©tate noir",
+      "Verres gris foncÃ©",
       "High Bridge Fit",
       "Fabrication italienne",
     ],
@@ -315,20 +334,23 @@ export const products: Product[] = [
   {
     id: 8,
     slug: "noir-degrade",
-    name: "Noir Dégradé",
+    name: "Noir DÃ©gradÃ©",
     brand: "Persol",
     reference: "PO3396S",
     modelCode: "PO3396S",
     category: "soleil",
     audience: ["homme", "femme"],
-    images: ["/images/products/persol/po3396s-front.webp"],
-    color: "Noir · Verres gris dégradés polarisés",
-    badge: "Polarisé",
+    images: [
+      "/images/products/persol/po3396s-front.webp",
+      "/images/products/persol-black-gradient.webp",
+    ],
+    color: "Noir Â· Verres gris dÃ©gradÃ©s polarisÃ©s",
+    badge: "PolarisÃ©",
     description:
-      "Une monture noire structurée avec des verres gris dégradés polarisés pour un rendu urbain et élégant.",
+      "Une monture noire structurÃ©e avec des verres gris dÃ©gradÃ©s polarisÃ©s pour un rendu urbain et Ã©lÃ©gant.",
     features: [
-      "Acétate noir",
-      "Verres dégradés polarisés",
+      "AcÃ©tate noir",
+      "Verres dÃ©gradÃ©s polarisÃ©s",
       "High Bridge Fit",
       "Fabrication italienne",
     ],
@@ -356,14 +378,17 @@ export const products: Product[] = [
     modelCode: "PO3342S",
     category: "soleil",
     audience: ["homme"],
-    images: ["/images/products/persol/po3342s-front.webp"],
-    color: "Noir · Verres verts polarisés",
-    badge: "Polarisé",
+    images: [
+      "/images/products/persol/po3342s-front.webp",
+      "/images/products/persol-black-sun.webp",
+    ],
+    color: "Noir Â· Verres verts polarisÃ©s",
+    badge: "PolarisÃ©",
     description:
-      "Une monture solaire noire à large couverture, conçue pour un style affirmé et une protection quotidienne.",
+      "Une monture solaire noire Ã  large couverture, conÃ§ue pour un style affirmÃ© et une protection quotidienne.",
     features: [
-      "Acétate noir",
-      "Verres verts polarisés",
+      "AcÃ©tate noir",
+      "Verres verts polarisÃ©s",
       "High Bridge Fit",
       "Fabrication italienne",
     ],
@@ -391,12 +416,15 @@ export const products: Product[] = [
     modelCode: "PO3007V",
     category: "vue",
     audience: ["homme", "femme"],
-    images: ["/images/products/persol/po3007v-front.webp"],
-    color: "Olive transparent · Verres optiques",
+    images: [
+      "/images/products/persol/po3007v-front.webp",
+      "/images/products/persol-green-optical.webp",
+    ],
+    color: "Olive transparent Â· Verres optiques",
     description:
-      "Une monture optique en acétate olive transparent, douce et contemporaine, adaptée aux visages plus fins.",
+      "Une monture optique en acÃ©tate olive transparent, douce et contemporaine, adaptÃ©e aux visages plus fins.",
     features: [
-      "Acétate olive transparent",
+      "AcÃ©tate olive transparent",
       "Monture optique",
       "High Bridge Fit",
       "Fabrication italienne",
@@ -404,7 +432,7 @@ export const products: Product[] = [
     frameColor: "Olive Transparent",
     frameMaterial: "Acetate",
     lensColor: "Clear",
-    lensMaterial: "Non précisé",
+    lensMaterial: "Non prÃ©cisÃ©",
     madeIn: "Italie",
     measurements: {
       lensWidth: 52,
@@ -424,28 +452,28 @@ export const accessories: Accessory[] = [
     slug: "cleaning-kit",
     name: "Cleaning Kit",
     image: "/images/accessories/cleaning-kit.webp",
-    description: "Kit complet pour nettoyer et protéger vos lunettes.",
+    description: "Kit complet pour nettoyer et protÃ©ger vos lunettes.",
   },
   {
     id: 2,
     slug: "exclusive-suede-case",
     name: "Exclusive Suede Case",
     image: "/images/accessories/exclusive-suede-case.webp",
-    description: "Étui premium avec finition douce.",
+    description: "Ã‰tui premium avec finition douce.",
   },
   {
     id: 3,
     slug: "leather-case-black",
     name: "Leather Case Black",
     image: "/images/accessories/leather-case-black.webp",
-    description: "Étui noir classique pour protéger votre monture.",
+    description: "Ã‰tui noir classique pour protÃ©ger votre monture.",
   },
   {
     id: 4,
     slug: "leather-case-brown",
     name: "Leather Case Brown",
     image: "/images/accessories/leather-case-brown.webp",
-    description: "Étui brun à la finition élégante.",
+    description: "Ã‰tui brun Ã  la finition Ã©lÃ©gante.",
   },
   {
     id: 5,
@@ -466,17 +494,18 @@ export const accessories: Accessory[] = [
     slug: "premium-care-kit",
     name: "Premium Care Kit",
     image: "/images/accessories/premium-care-kit.webp",
-    description: "Ensemble premium pour l’entretien quotidien.",
+    description: "Ensemble premium pour lâ€™entretien quotidien.",
   },
   {
     id: 8,
     slug: "travel-foldable-case",
     name: "Travel Foldable Case",
     image: "/images/accessories/travel-foldable-case.webp",
-    description: "Étui pliable, compact et facile à transporter.",
+    description: "Ã‰tui pliable, compact et facile Ã  transporter.",
   },
 ];
 
 export function getProductBySlug(slug: string) {
   return products.find((product) => product.slug === slug);
 }
+
