@@ -8,9 +8,11 @@ import {
   Phone,
   X,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import AppointmentModal from "../appointment/AppointmentModal";
+import { withBasePath } from "../../lib/site";
 
 const navLinks = [
   { name: "Accueil", href: "/#top" },
@@ -89,15 +91,16 @@ export default function Navbar() {
             href="/#top"
             aria-label="Loza Optique — Accueil"
             onClick={closeMobileMenu}
-            className="group shrink-0"
+            className="relative block h-16 w-[230px] shrink-0 sm:w-[250px]"
           >
-            <span className="block text-lg font-medium tracking-[0.16em] text-[#d6bd82] sm:text-xl">
-              LOZA OPTIQUE
-            </span>
-
-            <span className="mt-1 hidden text-[9px] uppercase tracking-[0.3em] text-white/45 sm:block">
-              Casablanca
-            </span>
+            <Image
+              src={withBasePath("/brand/logo-navbar-v3-tight.png")}
+              alt="Loza Optique"
+              fill
+              priority
+              sizes="250px"
+              className="object-contain object-left scale-[1.06]"
+            />
           </Link>
 
           <nav
@@ -225,3 +228,4 @@ export default function Navbar() {
     </>
   );
 }
+
