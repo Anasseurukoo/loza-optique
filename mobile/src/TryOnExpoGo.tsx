@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 
 import { eyewear, type CatalogueItem } from './data';
+import { manualOverlay } from './ar/geometry';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } =
   Dimensions.get('window');
@@ -44,13 +45,10 @@ export default function TryOnExpoGo({
 }) {
   const [permission, requestPermission] = useCameraPermissions();
   const [active, setActive] = useState(initial);
-  const [scale, setScale] = useState(initial.ar.scale);
+  const [scale, setScale] = useState(1);
   const [rotation, setRotation] = useState(0);
 
-  const [offset, setOffset] = useState<Offset>({
-    x: initial.ar.offsetX * SCREEN_WIDTH,
-    y: initial.ar.offsetY * SCREEN_HEIGHT,
-  });
+  const [offset, setOffset] = useState<Offset>({ x: 0, y: 0 });
 
   const dragStart = useRef<Offset>({
     x: 0,
@@ -58,23 +56,15 @@ export default function TryOnExpoGo({
   });
 
   const resetCalibration = () => {
-    setScale(active.ar.scale);
+    setScale(1);
     setRotation(0);
-
-    setOffset({
-      x: active.ar.offsetX * SCREEN_WIDTH,
-      y: active.ar.offsetY * SCREEN_HEIGHT,
-    });
+    setOffset({ x: 0, y: 0 });
   };
 
   useEffect(() => {
-    setScale(active.ar.scale);
+    setScale(1);
     setRotation(0);
-
-    setOffset({
-      x: active.ar.offsetX * SCREEN_WIDTH,
-      y: active.ar.offsetY * SCREEN_HEIGHT,
-    });
+    setOffset({ x: 0, y: 0 });
   }, [active]);
 
   const panResponder = useMemo(
@@ -139,35 +129,16 @@ export default function TryOnExpoGo({
     );
   }
 
-  /*
-   * Persol front images contain around 30 percent transparent padding.
-   * We compensate for that padding so the visible frame matches face width.
-   */
-  const imageVisibleOccupancy = 0.69;
-  const targetVisibleFrameRatio = 0.7;
-
-  const physicalRatio =
-    active.measurements.opticalWidth / 124;
-
-  const calculatedWidth =
-    (SCREEN_WIDTH *
-      targetVisibleFrameRatio *
-      physicalRatio *
-      scale) /
-    imageVisibleOccupancy;
-
-  const width = Math.min(
-    SCREEN_WIDTH * 0.98,
-    Math.max(SCREEN_WIDTH * 0.76, calculatedWidth),
-  );
-
-  const height = width / active.ar.aspect;
-
-  const left =
-    (SCREEN_WIDTH - width) / 2 + offset.x;
-
-  const top =
-    SCREEN_HEIGHT * 0.285 - height / 2 + offset.y;
+  const overlay = manualOverlay({
+    viewportWidth: SCREEN_WIDTH,
+    viewportHeight: SCREEN_HEIGHT,
+    opticalWidth: active.measurements.opticalWidth,
+    calibration: active.ar,
+    scale,
+    offsetX: offset.x,
+    offsetY: offset.y,
+    rotation,
+  });
 
   return (
     <View style={styles.root}>
@@ -189,28 +160,19 @@ export default function TryOnExpoGo({
         style={[
           styles.glasses,
           {
-            left,
-            top,
-            width,
-            height,
+            left: overlay.left,
+            top: overlay.top,
+            width: overlay.width,
+            height: overlay.height,
             transform: [
               {
-                rotate: `${rotation}deg`,
+                rotate: `${overlay.rotation}deg`,
               },
             ],
           },
         ]}
       >
-        <Image
-          source={active.arImage ?? active.image}
-          style={[
-            styles.glassesImage,
-            {
-              transform: [{ scale: 1.55 }],
-            },
-          ]}
-          resizeMode="contain"
-        />
+        <Image source={active.arImage ?? active.image} style={styles.glassesImage} resizeMode="contain" />
       </View>
 
       <View style={styles.header}>
@@ -234,7 +196,7 @@ export default function TryOnExpoGo({
 
         <View style={styles.modeBadge}>
           <Text style={styles.modeBadgeText}>
-            EXPO GO
+            MODE MANUEL
           </Text>
         </View>
       </View>
@@ -253,7 +215,7 @@ export default function TryOnExpoGo({
           style={styles.controlButton}
           onPress={() =>
             setScale((value) =>
-              Math.max(0.65, value - 0.05),
+              Math.max(0.78, value - 0.04),
             )
           }
         >
@@ -311,7 +273,7 @@ export default function TryOnExpoGo({
           style={styles.controlButton}
           onPress={() =>
             setScale((value) =>
-              Math.min(1.45, value + 0.05),
+              Math.min(1.28, value + 0.04),
             )
           }
         >

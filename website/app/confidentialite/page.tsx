@@ -31,9 +31,10 @@ const sections = [
     content: (
       <>
         La version actuelle ne crée pas de compte utilisateur et ne comporte
-        ni serveur applicatif, ni système de paiement. Les favoris, le choix
-        d’un rendez-vous et les informations affichées restent dans la session
-        de l’application et ne sont pas transmis à Loza Optique.
+        ni serveur applicatif, ni système de paiement. Les favoris et les
+        métadonnées du document choisi sont conservés localement sur l’appareil.
+        Le créneau demandé n’est transmis que lorsque vous choisissez d’ouvrir
+        votre application e-mail ; il doit ensuite être confirmé par la boutique.
       </>
     ),
   },
@@ -57,8 +58,9 @@ const sections = [
         Le sélecteur de documents permet de choisir localement une ordonnance
         au format PDF ou image. Dans la version actuelle, le fichier sélectionné
         reste sur votre appareil et n’est ni téléversé, ni envoyé, ni conservé
-        par le développeur ou par Loza Optique. L’application affiche seulement
-        son nom pendant la session en cours.
+        par le développeur ou par Loza Optique. Une copie locale et son nom sont
+        conservés dans l’espace de l’application pour que vous puissiez les
+        retrouver. Vous pouvez remplacer ou supprimer ce document depuis le profil.
       </>
     ),
   },
@@ -135,10 +137,10 @@ export default function PrivacyPolicyPage() {
           </p>
           <div className="mt-8 flex flex-wrap gap-3 text-xs font-semibold text-[#d6bd82]">
             <span className="rounded-full border border-[#d6bd82]/30 px-4 py-2">
-              Version 0.0.3
+              Version 1.0.0
             </span>
             <span className="rounded-full border border-[#d6bd82]/30 px-4 py-2">
-              Mise à jour : 18 juillet 2026
+              Mise à jour : 21 juillet 2026
             </span>
           </div>
         </header>

@@ -1,25 +1,18 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Dimensions, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useCameraDevice, useCameraPermission } from 'react-native-vision-camera';
 import { Camera, type Face } from 'react-native-vision-camera-face-detector';
 
+import {
+  overlayFromBounds,
+  overlayFromEyes,
+  smoothOverlay,
+  type Overlay,
+} from './ar/geometry';
 import { eyewear, type CatalogueItem } from './data';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-
-type Overlay = {
-  left: number;
-  top: number;
-  width: number;
-  height: number;
-  rotate: string;
-};
-
-const normalizeAngle = (angle: number) => {
-  if (angle > 90) return angle - 180;
-  if (angle < -90) return angle + 180;
-  return angle;
-};
 
 export default function TryOnNative({
   initial,
@@ -33,12 +26,16 @@ export default function TryOnNative({
   const [active, setActive] = useState(initial);
   const [overlay, setOverlay] = useState<Overlay | null>(null);
   const [error, setError] = useState('');
+  const [userScale, setUserScale] = useState(1);
+  const [userOffsetY, setUserOffsetY] = useState(0);
   const previous = useRef<Overlay | null>(null);
   const lastUpdate = useRef(0);
 
   useEffect(() => {
     previous.current = null;
     setOverlay(null);
+    setUserScale(1);
+    setUserOffsetY(0);
   }, [active]);
 
   const handleFaces = useCallback(
@@ -56,72 +53,41 @@ export default function TryOnNative({
 
       const leftEye = face.landmarks?.LEFT_EYE;
       const rightEye = face.landmarks?.RIGHT_EYE;
-      const physicalRatio = active.measurements.opticalWidth / 124;
+      const yawAngle = face.yawAngle ?? 0;
       let next: Overlay;
 
       if (leftEye && rightEye) {
-        const dx = rightEye.x - leftEye.x;
-        const dy = rightEye.y - leftEye.y;
-        const eyeDistance = Math.sqrt(dx * dx + dy * dy);
-        const width = Math.min(
-          SCREEN_WIDTH * 0.94,
-          Math.max(
-            SCREEN_WIDTH * 0.56,
-            eyeDistance * 2.65 * physicalRatio * active.ar.scale,
-          ),
-        );
-        const height = width / active.ar.aspect;
-        const centerX = (leftEye.x + rightEye.x) / 2 + width * active.ar.offsetX;
-        const centerY = (leftEye.y + rightEye.y) / 2 + width * active.ar.offsetY;
-        const angle = normalizeAngle(Math.atan2(dy, dx) * (180 / Math.PI));
-
-        next = {
-          left: centerX - width / 2,
-          top: centerY - height * 0.52,
-          width,
-          height,
-          rotate: `${angle}deg`,
-        };
+        next = overlayFromEyes({
+          leftEye,
+          rightEye,
+          viewportWidth: SCREEN_WIDTH,
+          viewportHeight: SCREEN_HEIGHT,
+          opticalWidth: active.measurements.opticalWidth,
+          calibration: active.ar,
+          yawAngle,
+          userScale,
+          userOffsetY,
+        });
       } else {
-        const width = Math.min(
-          SCREEN_WIDTH * 0.94,
-          face.bounds.width *
-            1.24 *
-            physicalRatio *
-            active.ar.scale,
-        );
-        const height = width / active.ar.aspect;
-
-        next = {
-          left:
-            face.bounds.x -
-            (width - face.bounds.width) / 2 +
-            width * active.ar.offsetX,
-          top:
-            face.bounds.y +
-            face.bounds.height * 0.22 +
-            width * active.ar.offsetY,
-          width,
-          height,
-          rotate: `${normalizeAngle(face.rollAngle)}deg`,
-        };
+        next = overlayFromBounds({
+          bounds: face.bounds,
+          viewportWidth: SCREEN_WIDTH,
+          viewportHeight: SCREEN_HEIGHT,
+          opticalWidth: active.measurements.opticalWidth,
+          calibration: active.ar,
+          rollAngle: face.rollAngle,
+          yawAngle,
+          userScale,
+          userOffsetY,
+        });
       }
 
-      const old = previous.current;
-      const smooth = old
-        ? {
-            left: old.left * 0.72 + next.left * 0.28,
-            top: old.top * 0.72 + next.top * 0.28,
-            width: old.width * 0.72 + next.width * 0.28,
-            height: old.height * 0.72 + next.height * 0.28,
-            rotate: next.rotate,
-          }
-        : next;
+      const smooth = smoothOverlay(previous.current, next, 0.3);
 
       previous.current = smooth;
       setOverlay(smooth);
     },
-    [active],
+    [active, userOffsetY, userScale],
   );
 
   if (!hasPermission) {
@@ -182,7 +148,7 @@ export default function TryOnNative({
               top: overlay.top,
               width: overlay.width,
               height: overlay.height,
-              transform: [{ rotate: overlay.rotate }],
+              transform: [{ rotate: `${overlay.rotation}deg` }],
             },
           ]}
         >
@@ -204,7 +170,7 @@ export default function TryOnNative({
         </View>
         <View style={styles.live}>
           <View style={styles.liveDot} />
-          <Text style={styles.liveText}>AUTO AR</Text>
+          <Text style={styles.liveText}>LIVE 2.5D</Text>
         </View>
       </View>
 
@@ -219,6 +185,42 @@ export default function TryOnNative({
           <Text style={styles.errorText}>{error}</Text>
         </View>
       ) : null}
+
+      <View style={styles.controls}>
+        <Pressable
+          style={styles.controlButton}
+          onPress={() => setUserScale((value) => Math.max(0.82, value - 0.04))}
+        >
+          <Ionicons name="remove" size={19} color="#FFFFFF" />
+        </Pressable>
+        <Pressable
+          style={styles.controlButton}
+          onPress={() => setUserOffsetY((value) => value - 4)}
+        >
+          <Ionicons name="arrow-up" size={18} color="#FFFFFF" />
+        </Pressable>
+        <Pressable
+          style={styles.controlButton}
+          onPress={() => {
+            setUserScale(1);
+            setUserOffsetY(0);
+          }}
+        >
+          <Ionicons name="locate-outline" size={19} color="#D8BF82" />
+        </Pressable>
+        <Pressable
+          style={styles.controlButton}
+          onPress={() => setUserOffsetY((value) => value + 4)}
+        >
+          <Ionicons name="arrow-down" size={18} color="#FFFFFF" />
+        </Pressable>
+        <Pressable
+          style={styles.controlButton}
+          onPress={() => setUserScale((value) => Math.min(1.22, value + 0.04))}
+        >
+          <Ionicons name="add" size={19} color="#FFFFFF" />
+        </Pressable>
+      </View>
 
       <View style={styles.bottom}>
         <Text style={styles.activeLabel}>
@@ -292,6 +294,26 @@ const styles = StyleSheet.create({
   hintText: { color: '#fff', fontSize: 12, fontWeight: '700', backgroundColor: 'rgba(7,19,21,.6)', paddingHorizontal: 15, paddingVertical: 9, borderRadius: 18 },
   error: { position: 'absolute', top: 98, left: 20, right: 20, backgroundColor: '#8D3D37', borderRadius: 14, padding: 10 },
   errorText: { color: '#fff', fontSize: 10, textAlign: 'center' },
+  controls: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 206,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 7,
+    zIndex: 8,
+  },
+  controlButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(7,19,21,.74)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   bottom: {
     position: 'absolute',
     left: 0,

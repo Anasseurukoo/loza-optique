@@ -1,45 +1,58 @@
-# Loza Optique Mobile
+# Loza Optique Mobile 1.0
 
-Application mobile Android/iOS de Loza Optique, construite avec Expo, React Native et TypeScript.
+Application premium Android/iOS de Loza Optique, construite avec Expo, React Native et TypeScript.
 
-## Version 0.0.3
+## Ce que contient la Release Candidate
 
-- Accueil premium fidèle à l'identité Loza.
-- Catalogue filtrable et recherche de montures.
-- Les 8 montures, 8 accessoires et 8 visuels lifestyle sont synchronisés avec le site officiel.
-- Favoris interactifs.
-- Parcours de prise de rendez-vous.
-- Virtual Mirror AR avec caméra frontale, détection ML Kit des repères du visage et suivi temps réel des montures.
-- Traitement AR local sur le téléphone : aucune image n'est envoyée vers un serveur.
-- Correction de l'orientation AR avec normalisation de l'angle du visage et masquage des reflets des visuels catalogue.
-- Ajout d'une ordonnance PDF ou image depuis le Profil et le parcours de rendez-vous.
-- Lisibilité renforcée et interface éditoriale épurée des symboles de lien externes.
-- Espace client préparé pour une future authentification.
-- Navigation mobile complète et responsive.
+- Accueil éditorial, catalogue filtrable, recherche et fiches produit détaillées.
+- 10 montures Persol, 8 accessoires et 6 campagnes lifestyle.
+- Favoris persistants sur l’appareil.
+- Ordonnance PDF ou image conservée localement, remplaçable et supprimable depuis le profil.
+- Demande de rendez-vous avec six jours ouvrés et solution de repli par téléphone.
+- Virtual Mirror avec 10 assets AR recadrés, calibration par modèle et correction selon les dimensions physiques.
+- Suivi natif des yeux, du roulis et du lacet, perspective 2.5D, lissage temporel et réglage fin manuel.
+- Mode manuel compatible Expo Go pour valider rapidement le design et les assets.
+- Traitement caméra local : aucune photo ni repère facial n’est enregistré ou envoyé.
 
-## Lancer le projet
+## Vérifier le projet
 
 ```bash
-npm install
-npx expo start --dev-client
+npm ci
+npm run check
+npx expo-doctor
+npx expo export --platform android
 ```
 
-Le Virtual Mirror utilise des modules natifs qui ne sont pas inclus dans Expo Go. La version 0.0.3 doit donc être lancée avec un development build.
+`npm run check` exécute le typecheck TypeScript et les 7 tests de géométrie AR.
 
-## Générer les APK Android
+## Tester le Virtual Mirror
+
+Expo Go ouvre automatiquement le mode manuel :
+
+```bash
+npx expo start
+```
+
+Le suivi facial automatique requiert les modules natifs du development build :
 
 ```bash
 npx eas-cli@latest build --platform android --profile development
-npx eas-cli@latest build --platform android --profile preview
 ```
 
-Le profil `development` sert aux tests et au réglage du suivi AR. Le profil `preview` produit l'APK de démonstration partageable.
+Le profil `preview` produit aussi un APK interne partageable. Avant toute publication, tester ce binaire sur plusieurs téléphones Android, avec lumière faible/forte, lunettes déjà portées, rotations de tête et différentes distances caméra.
 
-## Prochaines étapes
+## Builds Android
 
-1. Remplacer les produits de démonstration par le catalogue réel dès validation par la boutique.
-2. Connecter Supabase (produits, clients et rendez-vous).
-3. Remplacer les visuels de démonstration par des PNG/WebP frontaux calibrés dès réception des photos réelles.
-4. Ajouter les notifications et le suivi de commande.
-5. Ajouter arabe/français.
-6. Préparer les builds Google Play et App Store.
+```bash
+npx eas-cli@latest build --platform android --profile preview
+npx eas-cli@latest build --platform android --profile production
+```
+
+Le profil `production` produit un AAB. Ne pas le soumettre en production sans avoir terminé le test fermé et validé la fiche Data Safety.
+
+## Limites connues de cette étape
+
+- Le catalogue est local et ne gère ni stock ni prix en temps réel.
+- La réservation prépare un e-mail ; elle n’est confirmée qu’après réponse de la boutique.
+- L’ordonnance n’est jamais jointe à l’e-mail et doit être présentée en boutique.
+- La précision visuelle du Virtual Mirror doit encore être validée sur appareils physiques avant de revendiquer une calibration finale.
