@@ -1,56 +1,45 @@
-# Welcome to your Expo app 👋
+# Loza Optique Mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Application mobile Android/iOS de Loza Optique, construite avec Expo, React Native et TypeScript.
 
-## Get started
+## Version 0.0.3
 
-1. Install dependencies
+- Accueil premium fidèle à l'identité Loza.
+- Catalogue filtrable et recherche de montures.
+- Les 8 montures, 8 accessoires et 8 visuels lifestyle sont synchronisés avec le site officiel.
+- Favoris interactifs.
+- Parcours de prise de rendez-vous.
+- Virtual Mirror AR avec caméra frontale, détection ML Kit des repères du visage et suivi temps réel des montures.
+- Traitement AR local sur le téléphone : aucune image n'est envoyée vers un serveur.
+- Correction de l'orientation AR avec normalisation de l'angle du visage et masquage des reflets des visuels catalogue.
+- Ajout d'une ordonnance PDF ou image depuis le Profil et le parcours de rendez-vous.
+- Lisibilité renforcée et interface éditoriale épurée des symboles de lien externes.
+- Espace client préparé pour une future authentification.
+- Navigation mobile complète et responsive.
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Lancer le projet
 
 ```bash
-npm run reset-project
+npm install
+npx expo start --dev-client
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Le Virtual Mirror utilise des modules natifs qui ne sont pas inclus dans Expo Go. La version 0.0.3 doit donc être lancée avec un development build.
 
-### Other setup steps
+## Générer les APK Android
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+```bash
+npx eas-cli@latest build --platform android --profile development
+npx eas-cli@latest build --platform android --profile preview
+```
 
-## Learn more
+Le profil `development` sert aux tests et au réglage du suivi AR. Le profil `preview` produit l'APK de démonstration partageable.
 
-To learn more about developing your project with Expo, look at the following resources:
+## Prochaines étapes
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+1. Remplacer les produits de démonstration par le catalogue réel dès validation par la boutique.
+2. Connecter Supabase (produits, clients et rendez-vous).
+3. Remplacer les visuels de démonstration par des PNG/WebP frontaux calibrés dès réception des photos réelles.
+4. Ajouter les notifications et le suivi de commande.
+5. Ajouter arabe/français.
+6. Préparer les builds Google Play et App Store.
