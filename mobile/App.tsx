@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system/legacy';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo, useState } from 'react';
@@ -29,26 +30,12 @@ import {
   type CatalogueItem,
   type Category,
 } from './src/data';
+import { COLORS, TYPE } from './src/theme';
 
 type Tab = 'home' | 'catalogue' | 'favorites' | 'profile';
 type BookingDay = { id: string; dayName: string; dayNumber: string; longLabel: string };
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
-const COLORS = {
-  petrol: '#071D22',
-  petrolSoft: '#103943',
-  ivory: '#F6F1E7',
-  paper: '#FFFDF8',
-  gold: '#CDA65C',
-  goldSoft: '#E8D4A5',
-  ink: '#102F36',
-  muted: '#6C7D7B',
-  border: '#DED7C9',
-  white: '#FFFFFF',
-  danger: '#A94D45',
-  success: '#2F7A60',
-};
 
 const tabs: Array<{
   key: Tab;
@@ -231,15 +218,23 @@ function AppContent() {
   const [bookingDay, setBookingDay] = useState(bookingDays[0]?.id ?? '');
   const [bookingTime, setBookingTime] = useState('15:30');
   const [prescriptionName, setPrescriptionName] = useState('');
+  const [prescriptionUri, setPrescriptionUri] = useState('');
 
   useEffect(() => {
     Promise.all([
       AsyncStorage.getItem('@loza/favorites'),
+      AsyncStorage.getItem('@loza/prescription'),
       AsyncStorage.getItem('@loza/prescription-name'),
     ])
-      .then(([storedFavorites, storedPrescription]) => {
+      .then(([storedFavorites, storedPrescription, legacyPrescriptionName]) => {
         if (storedFavorites) setFavorites(JSON.parse(storedFavorites) as string[]);
-        if (storedPrescription) setPrescriptionName(storedPrescription);
+        if (storedPrescription) {
+          const prescription = JSON.parse(storedPrescription) as { name: string; uri: string };
+          setPrescriptionName(prescription.name);
+          setPrescriptionUri(prescription.uri);
+        } else if (legacyPrescriptionName) {
+          void AsyncStorage.removeItem('@loza/prescription-name');
+        }
       })
       .catch(() => undefined)
       .finally(() => setStorageReady(true));
@@ -252,12 +247,16 @@ function AppContent() {
 
   useEffect(() => {
     if (!storageReady) return;
-    if (prescriptionName) {
-      void AsyncStorage.setItem('@loza/prescription-name', prescriptionName);
-    } else {
+    if (prescriptionName && prescriptionUri) {
+      void AsyncStorage.setItem(
+        '@loza/prescription',
+        JSON.stringify({ name: prescriptionName, uri: prescriptionUri }),
+      );
       void AsyncStorage.removeItem('@loza/prescription-name');
+    } else {
+      void AsyncStorage.removeItem('@loza/prescription');
     }
-  }, [prescriptionName, storageReady]);
+  }, [prescriptionName, prescriptionUri, storageReady]);
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -288,8 +287,21 @@ function AppContent() {
     });
 
     if (!result.canceled && result.assets[0]) {
-      setPrescriptionName(result.assets[0].name);
+      const asset = result.assets[0];
+      if (prescriptionUri && prescriptionUri !== asset.uri) {
+        await FileSystem.deleteAsync(prescriptionUri, { idempotent: true }).catch(() => undefined);
+      }
+      setPrescriptionName(asset.name);
+      setPrescriptionUri(asset.uri);
     }
+  };
+
+  const removePrescription = async () => {
+    if (prescriptionUri) {
+      await FileSystem.deleteAsync(prescriptionUri, { idempotent: true }).catch(() => undefined);
+    }
+    setPrescriptionName('');
+    setPrescriptionUri('');
   };
 
   const confirmBooking = async () => {
@@ -299,10 +311,25 @@ function AppContent() {
       `Bonjour Loza Optique,\n\nJe souhaite demander un rendez-vous :\nDate : ${day?.longLabel ?? bookingDay}\nHeure : ${bookingTime}\nOrdonnance : ${prescriptionName || 'Non jointe'}\n\nMerci.`,
     );
 
-    setBookingConfirmed(true);
     const emailUrl = `mailto:lozaoptique@gmail.com?subject=${subject}&body=${body}`;
-    const canOpen = await Linking.canOpenURL(emailUrl);
-    if (canOpen) void Linking.openURL(emailUrl);
+    try {
+      const canOpen = await Linking.canOpenURL(emailUrl);
+      if (!canOpen) {
+        Alert.alert(
+          'Application e-mail indisponible',
+          'Appelez Loza au +212 5 22 82 12 83 pour confirmer votre rendez-vous.',
+          [
+            { text: 'Annuler', style: 'cancel' },
+            { text: 'Appeler', onPress: () => void Linking.openURL('tel:+212522821283') },
+          ],
+        );
+        return;
+      }
+      await Linking.openURL(emailUrl);
+      setBookingConfirmed(true);
+    } catch {
+      Alert.alert('Demande non ouverte', 'Réessayez ou contactez directement la boutique.');
+    }
   };
 
   const openProduct = (item: CatalogueItem) => setSelected(item);
@@ -559,7 +586,7 @@ function AppContent() {
               </Text>
             </Pressable>
             {prescriptionName ? (
-              <Pressable onPress={() => setPrescriptionName('')}>
+              <Pressable onPress={() => void removePrescription()}>
                 <Text style={styles.prescriptionRemove}>RETIRER</Text>
               </Pressable>
             ) : null}
@@ -597,8 +624,8 @@ function AppContent() {
       />
 
       <View style={styles.versionBox}>
-        <Text style={styles.versionText}>LOZA OPTIQUE · MOBILE V2 · 0.9.0</Text>
-        <Text style={styles.versionSubtext}>Android · AR ready · Casablanca</Text>
+        <Text style={styles.versionText}>LOZA OPTIQUE · RELEASE 1.0</Text>
+        <Text style={styles.versionSubtext}>Android · Virtual Mirror 2.5D · Casablanca</Text>
       </View>
     </ScrollView>
   );
@@ -915,6 +942,7 @@ const styles = StyleSheet.create({
   heroKicker: { color: COLORS.goldSoft, fontSize: 9, fontWeight: '900', letterSpacing: 1.8 },
   heroTitle: {
     color: COLORS.white,
+    fontFamily: TYPE.display,
     fontSize: 44,
     lineHeight: 46,
     letterSpacing: -1.8,
@@ -973,7 +1001,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   eyebrow: { color: COLORS.gold, fontSize: 9, fontWeight: '900', letterSpacing: 1.7 },
-  sectionTitle: { color: COLORS.ink, fontSize: 29, fontWeight: '700', marginTop: 6, letterSpacing: -0.8 },
+  sectionTitle: { color: COLORS.ink, fontFamily: TYPE.display, fontSize: 29, fontWeight: '700', marginTop: 6, letterSpacing: -0.8 },
   sectionAction: { color: COLORS.petrol, fontSize: 12, fontWeight: '800' },
 
   horizontalProducts: { gap: 12, paddingRight: 18 },
@@ -1032,7 +1060,7 @@ const styles = StyleSheet.create({
   },
   arFeatureCopy: { width: '64%', padding: 22, zIndex: 2 },
   arFeatureKicker: { color: COLORS.goldSoft, fontSize: 9, fontWeight: '900', letterSpacing: 1.5 },
-  arFeatureTitle: { color: COLORS.white, fontSize: 28, lineHeight: 31, fontWeight: '700', marginTop: 13 },
+  arFeatureTitle: { color: COLORS.white, fontFamily: TYPE.display, fontSize: 28, lineHeight: 31, fontWeight: '700', marginTop: 13 },
   arFeatureText: { color: '#B9CFCC', fontSize: 12, lineHeight: 18, marginTop: 12 },
   arFeatureLink: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 21 },
   arFeatureLinkText: { color: COLORS.goldSoft, fontSize: 9, fontWeight: '900', letterSpacing: 0.8 },
@@ -1077,7 +1105,7 @@ const styles = StyleSheet.create({
   },
 
   screenEyebrow: { color: COLORS.gold, fontSize: 9, fontWeight: '900', letterSpacing: 1.8, marginTop: 20 },
-  screenTitle: { color: COLORS.ink, fontSize: 39, lineHeight: 42, fontWeight: '700', letterSpacing: -1.5, marginTop: 8 },
+  screenTitle: { color: COLORS.ink, fontFamily: TYPE.display, fontSize: 39, lineHeight: 42, fontWeight: '700', letterSpacing: -1.5, marginTop: 8 },
   searchBox: {
     height: 58,
     borderRadius: 29,
@@ -1120,7 +1148,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  emptyTitle: { color: COLORS.ink, fontSize: 21, fontWeight: '800', marginTop: 20 },
+  emptyTitle: { color: COLORS.ink, fontFamily: TYPE.display, fontSize: 21, fontWeight: '800', marginTop: 20 },
   emptyText: { color: COLORS.muted, fontSize: 13, lineHeight: 20, textAlign: 'center', maxWidth: 290, marginTop: 9 },
   darkButton: {
     height: 52,
@@ -1134,7 +1162,7 @@ const styles = StyleSheet.create({
   darkButtonText: { color: COLORS.white, fontSize: 10, fontWeight: '900', letterSpacing: 0.9 },
 
   profileHero: { borderRadius: 28, padding: 22, marginTop: 10 },
-  profileHeroTitle: { color: COLORS.white, fontSize: 26, lineHeight: 29, fontWeight: '700', marginTop: 22 },
+  profileHeroTitle: { color: COLORS.white, fontFamily: TYPE.display, fontSize: 26, lineHeight: 29, fontWeight: '700', marginTop: 22 },
   profileHeroText: { color: '#B9CFCC', fontSize: 12, lineHeight: 18, marginTop: 10 },
   prescriptionCard: {
     borderRadius: 24,
@@ -1264,7 +1292,7 @@ const styles = StyleSheet.create({
   sheetHalo: { position: 'absolute', width: 220, height: 220, borderRadius: 110, backgroundColor: 'rgba(255,255,255,.28)' },
   sheetImage: { width: '92%', height: '82%' },
   sheetBrand: { color: COLORS.gold, fontSize: 9, fontWeight: '900', letterSpacing: 1.5, marginTop: 18 },
-  sheetName: { color: COLORS.ink, fontSize: 29, fontWeight: '800', marginTop: 6, letterSpacing: -0.9 },
+  sheetName: { color: COLORS.ink, fontFamily: TYPE.display, fontSize: 29, fontWeight: '800', marginTop: 6, letterSpacing: -0.9 },
   sheetDescription: { color: COLORS.muted, fontSize: 12, lineHeight: 19, marginTop: 10 },
   measureRow: {
     height: 75,
@@ -1304,7 +1332,7 @@ const styles = StyleSheet.create({
   },
 
   bookingEyebrow: { color: COLORS.gold, fontSize: 9, fontWeight: '900', letterSpacing: 1.5, marginTop: 9 },
-  bookingTitle: { color: COLORS.ink, fontSize: 31, lineHeight: 34, fontWeight: '800', marginTop: 8 },
+  bookingTitle: { color: COLORS.ink, fontFamily: TYPE.display, fontSize: 31, lineHeight: 34, fontWeight: '800', marginTop: 8 },
   bookingText: { color: COLORS.muted, fontSize: 12, lineHeight: 18, marginTop: 9 },
   bookingDays: { gap: 8, paddingVertical: 20 },
   bookingDay: {
@@ -1376,6 +1404,6 @@ const styles = StyleSheet.create({
   confirmCard: { width: '100%', borderRadius: 30, backgroundColor: COLORS.paper, padding: 29, alignItems: 'center' },
   confirmIcon: { width: 74, height: 74, borderRadius: 37, backgroundColor: '#D9ECE3', alignItems: 'center', justifyContent: 'center' },
   confirmEyebrow: { color: COLORS.gold, fontSize: 9, fontWeight: '900', letterSpacing: 1.6, marginTop: 22 },
-  confirmTitle: { color: COLORS.ink, fontSize: 26, fontWeight: '800', marginTop: 8 },
+  confirmTitle: { color: COLORS.ink, fontFamily: TYPE.display, fontSize: 26, fontWeight: '800', marginTop: 8 },
   confirmText: { color: COLORS.muted, fontSize: 13, lineHeight: 20, textAlign: 'center', marginTop: 10 },
 });
