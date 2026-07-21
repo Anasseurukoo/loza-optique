@@ -5,6 +5,7 @@ import { ArrowUpRight, Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import type { MouseEvent } from "react";
 import type { Product } from "../lib/products";
 import { withBasePath } from "../lib/site";
 
@@ -34,7 +35,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         type="button"
         aria-label={`Ajouter ${product.name} aux favoris`}
         aria-pressed={favorite}
-        onClick={(event) => {
+        onClick={(event: MouseEvent<HTMLButtonElement>) => {
           event.preventDefault();
           setFavorite((current) => !current);
         }}
