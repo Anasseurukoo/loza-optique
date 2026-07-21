@@ -16,7 +16,6 @@ export default function ProductCard({ product }: ProductCardProps) {
   const [favorite, setFavorite] = useState(false);
 
   const mainImage = withBasePath(product.images[0]);
-
   const hoverImage = product.images[1]
     ? withBasePath(product.images[1])
     : undefined;
@@ -71,19 +70,19 @@ export default function ProductCard({ product }: ProductCardProps) {
           {hoverImage && (
             <Image
               src={hoverImage}
-              alt={`${product.name} porté`}
+              alt={`${product.name} — vue alternative`}
               fill
               sizes="(max-width: 768px) 100vw, 33vw"
-              className="object-cover opacity-0 transition duration-700 group-hover:scale-105 group-hover:opacity-100"
+              className="object-contain p-7 opacity-0 transition duration-700 group-hover:scale-105 group-hover:opacity-100"
             />
           )}
 
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent opacity-0 transition duration-500 group-hover:opacity-100" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent opacity-0 transition duration-500 group-hover:opacity-100" />
         </div>
 
         <div className="p-6">
           <p className="text-xs uppercase tracking-[0.25em] text-[#a27d38]">
-            {product.category === "vue"
+            Persol · {product.category === "vue"
               ? "Lunettes de vue"
               : "Lunettes de soleil"}
           </p>
@@ -91,13 +90,13 @@ export default function ProductCard({ product }: ProductCardProps) {
           <div className="mt-3 flex items-end justify-between gap-4">
             <div>
               <h3 className="text-xl font-semibold">{product.name}</h3>
-
-              <p className="mt-1 text-sm text-[#6c7d7b]">
+              <p className="mt-1 text-sm font-medium text-[#6c7d7b]">
                 {product.reference}
               </p>
-
-              <p className="mt-3 text-sm text-[#526b6c]">
-                {product.color}
+              <p className="mt-3 text-sm text-[#526b6c]">{product.color}</p>
+              <p className="mt-2 text-xs text-[#6c7d7b]">
+                {product.measurements.lensWidth}-{product.measurements.bridgeWidth}
+                · {product.measurements.templeLength} mm
               </p>
             </div>
 

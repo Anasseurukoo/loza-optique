@@ -63,7 +63,7 @@ export default function Collections() {
         >
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.4em] text-[#a27d38]">
-              Sélection LOZA
+              Collection Persol
             </p>
 
             <h2 className="mt-5 max-w-3xl text-4xl font-semibold tracking-[-0.04em] sm:text-6xl">
@@ -75,9 +75,8 @@ export default function Collections() {
           </div>
 
           <p className="max-w-md leading-7 text-[#526b6c]">
-            Une sélection de démonstration. Les modèles définitifs seront
-            remplacés par les collections réellement disponibles chez LOZA
-            Optique.
+            Dix références Persol réelles, avec leurs couleurs, matières et
+            mesures officielles prêtes pour le site et la future calibration AR.
           </p>
         </motion.div>
 
@@ -131,11 +130,7 @@ export default function Collections() {
                   <p className="text-xs uppercase tracking-[0.25em] text-[#a27d38]">
                     Accessoire
                   </p>
-
-                  <h3 className="mt-3 text-lg font-semibold">
-                    {accessory.name}
-                  </h3>
-
+                  <h3 className="mt-3 text-lg font-semibold">{accessory.name}</h3>
                   <p className="mt-2 text-sm leading-6 text-[#6c7d7b]">
                     {accessory.description}
                   </p>

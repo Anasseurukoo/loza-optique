@@ -1,11 +1,32 @@
 export type ProductCategory = "vue" | "soleil";
 export type Audience = "homme" | "femme";
+export type FaceCoverage = "Petite" | "Standard" | "Generous";
+export type BridgeFit = "High Bridge Fit" | "Adjustable Nosepads";
+
+export type ProductMeasurements = {
+  lensWidth: number;
+  bridgeWidth: number;
+  templeLength: number;
+  faceCoverage: FaceCoverage;
+  bridgeFit: BridgeFit;
+  bestFor: string;
+};
+
+export type ARCalibration = {
+  opticalWidthMm: number;
+  scaleCorrection: number;
+  verticalOffset: number;
+  rotationOffset: number;
+  status: "ready-for-camera-calibration" | "validated";
+};
 
 export type Product = {
   id: number;
   slug: string;
   name: string;
+  brand: string;
   reference: string;
+  modelCode: string;
   category: ProductCategory;
   audience: Audience[];
   images: string[];
@@ -13,6 +34,13 @@ export type Product = {
   badge?: string;
   description: string;
   features: string[];
+  frameColor: string;
+  frameMaterial: string;
+  lensColor: string;
+  lensMaterial: string;
+  madeIn: string;
+  measurements: ProductMeasurements;
+  ar: ARCalibration;
 };
 
 export type Accessory = {
@@ -23,161 +51,370 @@ export type Accessory = {
   description: string;
 };
 
+const arFromSize = (
+  lensWidth: number,
+  bridgeWidth: number,
+): ARCalibration => ({
+  opticalWidthMm: lensWidth * 2 + bridgeWidth,
+  scaleCorrection: 1,
+  verticalOffset: 0,
+  rotationOffset: 0,
+  status: "ready-for-camera-calibration",
+});
+
 export const products: Product[] = [
   {
     id: 1,
     slug: "alpine-signature",
     name: "Alpine Signature",
-    reference: "DÉMO-001",
+    brand: "Persol",
+    reference: "PO2496SZ",
+    modelCode: "PO2496SZ",
     category: "soleil",
     audience: ["homme", "femme"],
-    images: [
-      "/images/products/persol-alpine-sun.webp",
-      "/images/lifestyle/persol-alpine-men.webp",
-      "/images/lifestyle/persol-alpine-women.webp",
-    ],
-    color: "Métal doré · Verres verts",
-    badge: "Collection signature",
+    images: ["/images/products/persol/po2496sz-front.webp"],
+    color: "Doré · Verres verts",
+    badge: "Signature",
     description:
-      "Une monture solaire au caractère affirmé, présentée dans cette version de démonstration pour illustrer l’expérience LOZA Optique.",
+      "Une monture ronde en métal doré au caractère iconique, complétée par des verres verts et des détails textiles distinctifs.",
     features: [
-      "Monture légère",
-      "Protection solaire",
-      "Style unisexe",
-      "Conseil et ajustement en magasin",
+      "Monture métal",
+      "Verres en cristal",
+      "Plaquettes ajustables",
+      "Fabrication italienne",
     ],
+    frameColor: "Gold",
+    frameMaterial: "Metal",
+    lensColor: "Green",
+    lensMaterial: "Crystal",
+    madeIn: "Italie",
+    measurements: {
+      lensWidth: 52,
+      bridgeWidth: 18,
+      templeLength: 140,
+      faceCoverage: "Standard",
+      bridgeFit: "Adjustable Nosepads",
+      bestFor: "La plupart des visages",
+    },
+    ar: arFromSize(52, 18),
   },
   {
     id: 2,
-    slug: "noir-carre",
-    name: "Noir Carré",
-    reference: "DÉMO-002",
+    slug: "noir-or",
+    name: "Noir & Or",
+    brand: "Persol",
+    reference: "PO3264S",
+    modelCode: "PO3264S",
     category: "soleil",
-    audience: ["homme", "femme"],
+    audience: ["homme"],
     images: [
-      "/images/products/persol-black-square.webp",
-      "/images/lifestyle/persol-men-black-square.webp",
-      "/images/lifestyle/persol-women-black-square.webp",
+      "/images/products/persol/po3264s-front.webp",
+      "/images/products/persol/po3264s-angle.webp",
     ],
-    color: "Noir brillant · Verres fumés",
-    badge: "Nouveau",
+    color: "Noir / Or · Verres noirs polarisés",
+    badge: "Polarisé",
     description:
-      "Une silhouette carrée et contemporaine pensée pour un style sobre, précis et facile à porter.",
+      "Une monture ronde noire rehaussée d’un pont doré, pensée pour un style masculin précis et contemporain.",
     features: [
-      "Forme carrée",
-      "Style unisexe",
-      "Verres solaires",
-      "Ajustement personnalisé",
+      "Acétate et métal",
+      "Verres noirs polarisés",
+      "Plaquettes ajustables",
+      "Fabrication italienne",
     ],
+    frameColor: "Black / Gold",
+    frameMaterial: "Acetate / Metal",
+    lensColor: "Black Polarized",
+    lensMaterial: "Crystal",
+    madeIn: "Italie",
+    measurements: {
+      lensWidth: 50,
+      bridgeWidth: 22,
+      templeLength: 140,
+      faceCoverage: "Standard",
+      bridgeFit: "Adjustable Nosepads",
+      bestFor: "La plupart des visages",
+    },
+    ar: arFromSize(50, 22),
   },
   {
     id: 3,
-    slug: "ida-doree",
-    name: "Ida Dorée",
-    reference: "DÉMO-003",
+    slug: "or-violet",
+    name: "Or Violet",
+    brand: "Persol",
+    reference: "PO1019S",
+    modelCode: "PO1019S",
     category: "soleil",
-    audience: ["homme", "femme"],
-    images: ["/images/products/persol-gold-sun.webp"],
-    color: "Métal doré · Verres gris",
-    description:
-      "Une monture fine et élégante, idéale pour présenter une sélection solaire raffinée.",
-    features: [
-      "Métal doré",
-      "Monture légère",
-      "Style mixte",
-      "Disponible sur demande",
+    audience: ["femme"],
+    images: [
+      "/images/products/persol/po1019s-front.webp",
+      "/images/products/persol/po1019s-angle.webp",
     ],
+    color: "Doré · Verres violets",
+    badge: "Élégance",
+    description:
+      "Une monture ronde dorée aux verres violets, légère et raffinée, avec des branches mêlant métal et acétate.",
+    features: [
+      "Métal et acétate",
+      "Verres violets en cristal",
+      "Plaquettes ajustables",
+      "Fabrication italienne",
+    ],
+    frameColor: "Gold",
+    frameMaterial: "Metal Acetate",
+    lensColor: "Violet",
+    lensMaterial: "Crystal",
+    madeIn: "Italie",
+    measurements: {
+      lensWidth: 53,
+      bridgeWidth: 20,
+      templeLength: 140,
+      faceCoverage: "Standard",
+      bridgeFit: "Adjustable Nosepads",
+      bestFor: "Visages larges",
+    },
+    ar: arFromSize(53, 20),
   },
   {
     id: 4,
-    slug: "indigo-optical",
-    name: "Indigo Optical",
-    reference: "DÉMO-004",
-    category: "vue",
+    slug: "havane-solaire",
+    name: "Havane Solaire",
+    brand: "Persol",
+    reference: "PO3393S",
+    modelCode: "PO3393S",
+    category: "soleil",
     audience: ["homme", "femme"],
-    images: ["/images/products/persol-blue-optical.webp"],
-    color: "Acétate bleu · Verres optiques",
+    images: ["/images/products/persol/po3393s-front.webp"],
+    color: "Havane · Verres verts",
+    badge: "3D Ready",
     description:
-      "Une monture optique bleue destinée à illustrer la collection lunettes de vue.",
+      "Une monture solaire havane généreuse, structurée par un double pont et associée à des verres verts en cristal.",
     features: [
-      "Monture optique",
-      "Acétate bleu",
-      "Conseil morphologique",
-      "Montage en magasin",
+      "Acétate havane",
+      "Verres verts en cristal",
+      "High Bridge Fit",
+      "Fabrication italienne",
     ],
+    frameColor: "Havana",
+    frameMaterial: "Acetate",
+    lensColor: "Green",
+    lensMaterial: "Crystal",
+    madeIn: "Italie",
+    measurements: {
+      lensWidth: 56,
+      bridgeWidth: 20,
+      templeLength: 145,
+      faceCoverage: "Generous",
+      bridgeFit: "High Bridge Fit",
+      bestFor: "Visages larges",
+    },
+    ar: arFromSize(56, 20),
   },
   {
     id: 5,
-    slug: "sauge-optical",
-    name: "Sauge Optical",
-    reference: "DÉMO-005",
-    category: "vue",
+    slug: "ida-doree",
+    name: "Ida Dorée",
+    brand: "Persol",
+    reference: "PO1018S",
+    modelCode: "PO1018S",
+    category: "soleil",
     audience: ["homme", "femme"],
-    images: ["/images/products/persol-green-optical.webp"],
-    color: "Acétate vert sauge · Verres optiques",
+    images: ["/images/products/persol/po1018s-front.webp"],
+    color: "Doré · Verres verts polarisés",
+    badge: "Polarisé",
     description:
-      "Une monture transparente aux nuances vert sauge, douce et contemporaine.",
+      "Une monture fine en métal doré, équilibrée par des verres verts polarisés et des branches en acétate.",
     features: [
-      "Acétate transparent",
-      "Monture optique",
-      "Style contemporain",
-      "Réglage personnalisé",
+      "Métal et acétate",
+      "Verres verts polarisés",
+      "Plaquettes ajustables",
+      "Fabrication italienne",
     ],
+    frameColor: "Gold",
+    frameMaterial: "Metal Acetate",
+    lensColor: "Polarized Green",
+    lensMaterial: "Crystal",
+    madeIn: "Italie",
+    measurements: {
+      lensWidth: 52,
+      bridgeWidth: 21,
+      templeLength: 145,
+      faceCoverage: "Petite",
+      bridgeFit: "Adjustable Nosepads",
+      bestFor: "Visages larges",
+    },
+    ar: arFromSize(52, 21),
   },
   {
     id: 6,
-    slug: "havane-solaire",
-    name: "Havane Solaire",
-    reference: "DÉMO-006",
-    category: "soleil",
+    slug: "indigo-optical",
+    name: "Indigo Optical",
+    brand: "Persol",
+    reference: "PO3318V",
+    modelCode: "PO3318V",
+    category: "vue",
     audience: ["homme", "femme"],
-    images: ["/images/products/persol-tortoise-sun.webp"],
-    color: "Écaille havane · Verres verts",
+    images: ["/images/products/persol/po3318v-front.webp"],
+    color: "Cobalto · Verres optiques",
     description:
-      "Une monture solaire écaille au style intemporel et chaleureux.",
+      "Une monture optique en acétate bleu cobalto, équilibrée et polyvalente pour un usage quotidien.",
     features: [
-      "Finition écaille",
-      "Verres solaires",
-      "Style intemporel",
-      "Disponible sur demande",
+      "Acétate cobalto",
+      "Monture optique",
+      "High Bridge Fit",
+      "Fabrication italienne",
     ],
+    frameColor: "Cobalto",
+    frameMaterial: "Acetate",
+    lensColor: "Clear",
+    lensMaterial: "Non précisé",
+    madeIn: "Italie",
+    measurements: {
+      lensWidth: 51,
+      bridgeWidth: 21,
+      templeLength: 145,
+      faceCoverage: "Standard",
+      bridgeFit: "High Bridge Fit",
+      bestFor: "La plupart des visages",
+    },
+    ar: arFromSize(51, 21),
   },
   {
     id: 7,
-    slug: "polar-noir",
-    name: "Polar Noir",
-    reference: "DÉMO-007",
+    slug: "noir-carre",
+    name: "Noir Carré",
+    brand: "Persol",
+    reference: "PO3269S",
+    modelCode: "PO3269S",
     category: "soleil",
-    audience: ["homme"],
-    images: ["/images/products/persol-black-sun.webp"],
-    color: "Noir · Verres verts",
-    badge: "Polarisé",
+    audience: ["homme", "femme"],
+    images: ["/images/products/persol/po3269s-front.webp"],
+    color: "Noir · Verres gris foncé",
     description:
-      "Une monture solaire noire au design affirmé, pensée pour un usage quotidien.",
+      "Une silhouette carrée noire, sobre et contemporaine, complétée par des verres gris foncé en cristal.",
     features: [
-      "Design masculin",
-      "Verres solaires",
-      "Monture noire",
-      "Ajustement en magasin",
+      "Acétate noir",
+      "Verres gris foncé",
+      "High Bridge Fit",
+      "Fabrication italienne",
     ],
+    frameColor: "Black",
+    frameMaterial: "Acetate",
+    lensColor: "Dark Grey",
+    lensMaterial: "Crystal",
+    madeIn: "Italie",
+    measurements: {
+      lensWidth: 52,
+      bridgeWidth: 20,
+      templeLength: 145,
+      faceCoverage: "Standard",
+      bridgeFit: "High Bridge Fit",
+      bestFor: "La plupart des visages",
+    },
+    ar: arFromSize(52, 20),
   },
   {
     id: 8,
     slug: "noir-degrade",
     name: "Noir Dégradé",
-    reference: "DÉMO-008",
+    brand: "Persol",
+    reference: "PO3396S",
+    modelCode: "PO3396S",
     category: "soleil",
     audience: ["homme", "femme"],
-    images: ["/images/products/persol-black-gradient.webp"],
-    color: "Noir brillant · Verres dégradés",
+    images: ["/images/products/persol/po3396s-front.webp"],
+    color: "Noir · Verres gris dégradés polarisés",
+    badge: "Polarisé",
     description:
-      "Une monture noire structurée avec des verres dégradés pour un rendu urbain et élégant.",
+      "Une monture noire structurée avec des verres gris dégradés polarisés pour un rendu urbain et élégant.",
     features: [
-      "Verres dégradés",
-      "Monture structurée",
-      "Style unisexe",
-      "Disponible sur demande",
+      "Acétate noir",
+      "Verres dégradés polarisés",
+      "High Bridge Fit",
+      "Fabrication italienne",
     ],
+    frameColor: "Black",
+    frameMaterial: "Acetate",
+    lensColor: "Gradient Grey Polarized",
+    lensMaterial: "Crystal",
+    madeIn: "Italie",
+    measurements: {
+      lensWidth: 53,
+      bridgeWidth: 20,
+      templeLength: 145,
+      faceCoverage: "Standard",
+      bridgeFit: "High Bridge Fit",
+      bestFor: "La plupart des visages",
+    },
+    ar: arFromSize(53, 20),
+  },
+  {
+    id: 9,
+    slug: "polar-noir",
+    name: "Polar Noir",
+    brand: "Persol",
+    reference: "PO3342S",
+    modelCode: "PO3342S",
+    category: "soleil",
+    audience: ["homme"],
+    images: ["/images/products/persol/po3342s-front.webp"],
+    color: "Noir · Verres verts polarisés",
+    badge: "Polarisé",
+    description:
+      "Une monture solaire noire à large couverture, conçue pour un style affirmé et une protection quotidienne.",
+    features: [
+      "Acétate noir",
+      "Verres verts polarisés",
+      "High Bridge Fit",
+      "Fabrication italienne",
+    ],
+    frameColor: "Black",
+    frameMaterial: "Acetate",
+    lensColor: "Polarized Green",
+    lensMaterial: "Crystal",
+    madeIn: "Italie",
+    measurements: {
+      lensWidth: 63,
+      bridgeWidth: 14,
+      templeLength: 135,
+      faceCoverage: "Standard",
+      bridgeFit: "High Bridge Fit",
+      bestFor: "Visages larges",
+    },
+    ar: arFromSize(63, 14),
+  },
+  {
+    id: 10,
+    slug: "sauge-optical",
+    name: "Sauge Optical",
+    brand: "Persol",
+    reference: "PO3007V",
+    modelCode: "PO3007V",
+    category: "vue",
+    audience: ["homme", "femme"],
+    images: ["/images/products/persol/po3007v-front.webp"],
+    color: "Olive transparent · Verres optiques",
+    description:
+      "Une monture optique en acétate olive transparent, douce et contemporaine, adaptée aux visages plus fins.",
+    features: [
+      "Acétate olive transparent",
+      "Monture optique",
+      "High Bridge Fit",
+      "Fabrication italienne",
+    ],
+    frameColor: "Olive Transparent",
+    frameMaterial: "Acetate",
+    lensColor: "Clear",
+    lensMaterial: "Non précisé",
+    madeIn: "Italie",
+    measurements: {
+      lensWidth: 52,
+      bridgeWidth: 19,
+      templeLength: 145,
+      faceCoverage: "Petite",
+      bridgeFit: "High Bridge Fit",
+      bestFor: "La plupart des visages",
+    },
+    ar: arFromSize(52, 19),
   },
 ];
 

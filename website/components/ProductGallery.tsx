@@ -37,9 +37,7 @@ export default function ProductGallery({
           fill
           priority={activeIndex === 0}
           sizes="(max-width: 1024px) 100vw, 55vw"
-          className={`transition duration-700 group-hover:scale-105 ${
-            activeIndex === 0 ? "object-contain p-8" : "object-cover"
-          }`}
+          className="object-contain p-6 transition duration-700 group-hover:scale-105 sm:p-10"
         />
 
         {images.length > 1 && (
@@ -87,9 +85,7 @@ export default function ProductGallery({
                 alt={`${name} miniature ${index + 1}`}
                 fill
                 sizes="150px"
-                className={
-                  index === 0 ? "object-contain p-3" : "object-cover"
-                }
+                className="object-contain p-3"
               />
             </button>
           ))}
