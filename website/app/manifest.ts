@@ -1,11 +1,13 @@
 import type { MetadataRoute } from "next";
 
+export const dynamic = "force-static";
+
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Loza Optique",
     short_name: "LOZA",
     description:
-      "Loza Optique à Casablanca — montures, conseil, mesure et ajustement.",
+      "Loza Optique \u00e0 Casablanca \u2014 montures, conseil, mesure et ajustement.",
     start_url: "/",
     display: "standalone",
     background_color: "#f6f1e7",
