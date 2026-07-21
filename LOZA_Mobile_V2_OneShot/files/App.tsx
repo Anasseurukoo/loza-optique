@@ -612,7 +612,7 @@ function AppContent() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar style="dark" />
+      <StatusBar style="dark" backgroundColor={COLORS.ivory} />
       <View style={styles.content}>{screen}</View>
 
       <View style={styles.bottomNavShell}>
